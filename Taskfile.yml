@@ -1,0 +1,21 @@
+version: '3'
+dotenv: ['{{.HOME}}/.txacct.env']
+tasks:
+  run:
+    cmds:
+      - poetry run flask run 
+  db:init:
+    desc: "db init"
+    cmds:
+      - poetry run flask db init
+  db:migrate:
+    desc: "db migrate"
+    cmds:
+      - poetry run flask db migrate
+  db:upgrade:
+    cmds:
+      - poetry run flask db upgrade
+  postcode:import:
+    cmds:
+      - poetry run flask postcode import
+
