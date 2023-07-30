@@ -2,60 +2,58 @@ from flask import Flask, Blueprint, jsonify, Response, request, abort, current_a
 from flask.cli import AppGroup, with_appcontext
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from typing import Any
-import click
-from sqlalchemy.orm import RelationshipProperty
-from sqlalchemy.exc import IntegrityError
+from typing import Any, List
+from sqlalchemy import func, String, ForeignKey, Integer
+from sqlalchemy.orm import mapped_column, Mapped, relationship
+from sqlalchemy.exc import IntegrityError, NoResultFound
 import sys
 import requests
 import json
-import pprint
-from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
+import nltk
+from nltk.tokenize import word_tokenize
 
 db: SQLAlchemy = SQLAlchemy()
 
 transactions_bp: Blueprint = Blueprint("transactions", __name__, url_prefix="/transactions") 
 
+
 class Transaction(db.Model):
-    id: Any = db.Column(db.Integer, primary_key=True)
-    memo: Any = db.Column(db.String, nullable=False)
-
-class TransactionSchema(SQLAlchemySchema):
-    class Meta:
-        model = Transaction
-        include_relationships: bool = True
-        load_instance: bool = True
-
-    id = auto_field()
-    memo = auto_field()
+    id: Mapped[int] = mapped_column(primary_key=True)
+    memo: Mapped[str] = mapped_column(String(), nullable=False)
 
 class Postcode(db.Model):
     __table_args__: tuple[Any] = (db.UniqueConstraint("postcode", "locality"),)
 
-    id: Any = db.Column(db.Integer, primary_key=True)
-    postcode: Any = db.Column(db.String, nullable=False)
-    locality: Any = db.Column(db.String, nullable=False)
-    state: Any = db.Column(db.String, nullable=False)
-    sa3_id: Any = db.Column(db.Integer, db.ForeignKey("sa3.id"))
-    sa4_id: Any = db.Column(db.Integer, db.ForeignKey("sa4.id"))
+    id: Mapped[int] = mapped_column(primary_key=True)
+    postcode: Mapped[str] = mapped_column(String(), nullable=False)
+    locality: Mapped[str] = mapped_column(String(), nullable=False)
+    state_id: Mapped[int] = mapped_column(ForeignKey("state.id"))
+    sa3_id: Mapped[int] = mapped_column(ForeignKey("sa3.id"), nullable=True)
+    sa3: Mapped["StatisticalArea3"] = relationship(back_populates="postcodes")
+    sa4_id: Mapped[int] = mapped_column(ForeignKey("sa4.id"), nullable=True)
+    sa4: Mapped["StatisticalArea4"] = relationship(back_populates="postcodes")
 
 class StatisticalArea3(db.Model):
     __tablename__: str = "sa3"
     __table_args__: tuple[Any] = (db.UniqueConstraint("code", "name"),)
 
-    id: Any = db.Column(db.Integer, primary_key=True)
-    code: Any = db.Column(db.Integer, nullable=False)
-    name: Any = db.Column(db.String, nullable=False)
-    postcodes = db.relationship("Postcode", backref="sa3")
+    id: Mapped[int] = mapped_column(primary_key=True)
+    code: Mapped[int] = mapped_column(Integer(), nullable=False)
+    name: Mapped[str] = mapped_column(String(), nullable=False)
+    postcodes: Mapped[List["Postcode"]] = relationship(back_populates="sa3")
 
 class StatisticalArea4(db.Model):
     __tablename__: str = "sa4"
     __table_args__: tuple[Any] = (db.UniqueConstraint("code", "name"),)
 
+    id: Mapped[int] = mapped_column(primary_key=True)
+    code: Mapped[int] = mapped_column(Integer(), nullable=False)
+    name: Mapped[str] = mapped_column(String(), nullable=False)
+    postcodes: Mapped[List["Postcode"]] = relationship(back_populates="sa4")
+
+class State(db.Model):
     id: Any = db.Column(db.Integer, primary_key=True)
-    code: Any = db.Column(db.Integer, nullable=False)
-    name: Any = db.Column(db.String, nullable=False)
-    postcodes = db.relationship("Postcode", backref="sa4")
+    name: Any = db.Column(db.String, nullable=False, unique=True)
 
 @transactions_bp.route("/", methods=["POST"])
 def transactions() -> Response:
@@ -68,9 +66,74 @@ def transactions() -> Response:
     db.session.add(transaction)
     db.session.commit()
 
-    return jsonify(TransactionSchema().dump(transaction))
+    tm = TransactionMeta(memo=transaction.memo, db=db)
+
+    # OLINDA PHARMACY OLINDA VIC
+    # The Deli Platter Olinda VIC
+    # SP HERE & THERE MAKE FERNTREE GULVIC
+    # MAXI FOODS UPPER FERNT UPPER FERNTR
+
+    d = { 
+        "id": transaction.id,
+        "memo": transaction.memo,
+    }
+
+    locality = dict()
+    state = tm.state()
+    if state is not None:
+        locality["state"] = dict({
+            "name": state.name,
+        })
+
+        postcode = tm.postcode(locality=tm.tokenized[-2], state=state)
+        print(postcode)
+        if len(postcode) >= 1:
+            names = []
+            for i in postcode:
+                d2 = dict({"name": i.locality, "postcode": i.postcode})
+                if i.sa3:
+                    d2["sa3"] = dict({
+                        "name": i.sa3.name,
+                    })
+                if i.sa4:
+                    d2["sa4"] = dict({
+                        "name": i.sa4.name,
+                    })
+                names.append(d2)
+
+            locality["names"] = names
+        
+
+    d["locality"] = locality
+
+    return jsonify(d)
+
+class TransactionMeta:
+    def __init__(self, memo: str, db) -> None:
+        self.memo: str = memo
+        self.db = db
+        self.tokenized: List[str] = word_tokenize(self.memo)
+
+    """ state returns the Australian state of the transaction. """
+    def state(self) -> (State | None):
+        # Take last item from tokenized and see if its a match on state.
+        l: str = self.tokenized[-1]
+        try:
+            s = self.db.session.query(State).filter(func.lower(State.name) == l.lower()).one()
+        except NoResultFound:
+            s = None
+        return s
+
+    def postcode(self, locality: str, state: State) -> List[Postcode]:
+        return self.db.session.query(Postcode).filter(Postcode.locality == locality, Postcode.state_id == state.id).all()
 
 postcode_cli = AppGroup('postcode')
+nltk_cli = AppGroup('nltk')
+
+@nltk_cli.command('download')
+def nltk_download():
+    nltk.download('punkt')
+
 @postcode_cli.command('import')
 @with_appcontext
 def postcode_import():
@@ -108,10 +171,20 @@ def postcode_import():
                 db.session.rollback()
                 sa4 = db.session.query(StatisticalArea4).filter_by(code=int(sa4.code), name=sa4.name).one()
 
+        state = None
+        if i.get("state") != "":
+            state = State(name=i.get("state"))
+            db.session.add(state)
+            try:
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
+                state = db.session.query(State).filter_by(name=state.name).one()
+
         postcode: Postcode = Postcode(
             postcode=i.get("postcode"),
             locality=i.get("locality"),
-            state=i.get("state"),
+            state=state,
             sa3=sa3,
             sa4=sa4,
         )
@@ -124,11 +197,15 @@ def postcode_import():
 
     return None
 
-def create_app() -> Flask:
+def create_app(test_config: dict | None=None) -> Flask:
     app: Flask = Flask(__name__)
-    app.config.from_prefixed_env(prefix="TXACCT")
+    if test_config:
+        app.config.from_mapping(test_config)
+    else:
+        app.config.from_prefixed_env(prefix="TXACCT")
     db.init_app(app)
     Migrate(app, db)
     app.register_blueprint(transactions_bp)
     app.cli.add_command(postcode_cli)
+    app.cli.add_command(nltk_cli)
     return app
