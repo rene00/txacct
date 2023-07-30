@@ -10,12 +10,20 @@ Flask = "^2.3.2"
 Flask-SQLAlchemy = "^3.0.5"
 psycopg = "^3.1.9"
 Flask-Migrate = "^4.0.4"
-marshmallow-sqlalchemy = "^0.29.0"
 click = "^8.1.6"
 requests = "^2.31.0"
+nltk = "^3.8.1"
 
 [tool.poetry.dev-dependencies]
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]

@@ -22,12 +22,13 @@ class Transaction(db.Model):
     memo: Mapped[str] = mapped_column(String(), nullable=False)
 
 class Postcode(db.Model):
-    __table_args__: tuple[Any] = (db.UniqueConstraint("postcode", "locality"),)
+    __table_args__: tuple[Any] = (db.UniqueConstraint("postcode", "locality", name="postcode_locality"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     postcode: Mapped[str] = mapped_column(String(), nullable=False)
     locality: Mapped[str] = mapped_column(String(), nullable=False)
     state_id: Mapped[int] = mapped_column(ForeignKey("state.id"))
+    state: Mapped["State"] = relationship(back_populates="postcodes")
     sa3_id: Mapped[int] = mapped_column(ForeignKey("sa3.id"), nullable=True)
     sa3: Mapped["StatisticalArea3"] = relationship(back_populates="postcodes")
     sa4_id: Mapped[int] = mapped_column(ForeignKey("sa4.id"), nullable=True)
@@ -54,6 +55,7 @@ class StatisticalArea4(db.Model):
 class State(db.Model):
     id: Any = db.Column(db.Integer, primary_key=True)
     name: Any = db.Column(db.String, nullable=False, unique=True)
+    postcodes: Mapped[List["Postcode"]] = relationship(back_populates="state")
 
 @transactions_bp.route("/", methods=["POST"])
 def transactions() -> Response:
