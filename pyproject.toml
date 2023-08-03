@@ -8,7 +8,7 @@ authors = ["Rene Cunningham <rene@compounddata.com>"]
 python = "^3.9"
 Flask = "^2.3.2"
 Flask-SQLAlchemy = "^3.0.5"
-psycopg = "^3.1.9"
+psycopg = {extras = ["c"], version = "^3.1.9"}
 Flask-Migrate = "^4.0.4"
 click = "^8.1.6"
 requests = "^2.31.0"

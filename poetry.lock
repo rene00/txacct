@@ -512,6 +512,7 @@ files = [
 ]
 
 [package.dependencies]
+psycopg-c = {version = "3.1.9", optional = true, markers = "extra == \"c\""}
 typing-extensions = ">=4.1"
 tzdata = {version = "*", markers = "sys_platform == \"win32\""}
 
@@ -522,6 +523,16 @@ dev = ["black (>=23.1.0)", "dnspython (>=2.1)", "flake8 (>=4.0)", "mypy (>=1.2)"
 docs = ["Sphinx (>=5.0)", "furo (==2022.6.21)", "sphinx-autobuild (>=2021.3.14)", "sphinx-autodoc-typehints (>=1.12)"]
 pool = ["psycopg-pool"]
 test = ["anyio (>=3.6.2)", "mypy (>=1.2)", "pproxy (>=2.7)", "pytest (>=6.2.5)", "pytest-cov (>=3.0)", "pytest-randomly (>=3.5)"]
+
+[[package]]
+name = "psycopg-c"
+version = "3.1.9"
+description = "PostgreSQL database adapter for Python -- C optimisation distribution"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "psycopg-c-3.1.9.tar.gz", hash = "sha256:d160b45b0ee1eb05d78a81538c2bc6868bacb5f421b7190ed65d4681e4552455"},
+]
 
 [[package]]
 name = "pytest"
@@ -846,4 +857,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "bd80d5a4d4be7ee33c0148916794c40ef053a4014a8cddfd777457990f5a4a65"
+content-hash = "d4d5dce50fa0f66f4ffe6e3c5a510e6f242b10586e2c50fd6ba8fa0ed96f2189"

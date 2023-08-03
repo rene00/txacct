@@ -1,5 +1,10 @@
 version: '3'
 dotenv: ['{{.HOME}}/.txacct.env']
+vars:
+  CONTAINER_TAG:
+    sh: git log -n1 --format=%h
+  CONTAINER_REGISTRY: ghcr.io
+  CONTAINER_IMAGE_NAME: rene00/txacct
 tasks:
   run:
     cmds:
@@ -18,4 +23,15 @@ tasks:
   postcode:import:
     cmds:
       - poetry run flask postcode import
-
+  container:build:
+    cmds:
+      - podman build . -t {{.CONTAINER_REGISTRY}}/{{.CONTAINER_IMAGE_NAME}}:{{.CONTAINER_TAG}} {{.PODMAN_BUILD_ARGS}}
+  container:run:
+    vars:
+      HOST_PORT: 5000
+    cmds:
+      - |
+        podman run -it --restart always \
+          --publish {{ .HOST_PORT }}:5000 \
+          --env-file ~/.txacct.env \
+          --name txacct {{.CONTAINER_REGISTRY}}/{{.CONTAINER_IMAGE_NAME}}:{{.CONTAINER_TAG}}
