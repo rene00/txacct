@@ -5,7 +5,7 @@ on:
     tags:
       - '*'
     branches:
-      - 'master'
+      - 'main'
 
 env:
   REGISTRY_USER: ${{ github.actor }}
