@@ -19,7 +19,9 @@ RUN poetry install --no-dev
 
 RUN poetry run python -m nltk.downloader punkt
 
-COPY boot.sh app.py txacct . 
+COPY boot.sh app.py . 
+
+COPY txacct ./txacct
 
 COPY migrations ./migrations
 
