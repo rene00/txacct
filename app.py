@@ -11,6 +11,8 @@ import requests
 import json
 import nltk
 from nltk.tokenize import word_tokenize
+from typing import List, Dict, NewType
+from txacct.types import StateName, LocalityName
 
 db: SQLAlchemy = SQLAlchemy()
 
@@ -70,40 +72,50 @@ def transactions() -> Response:
 
     tm = TransactionMeta(memo=transaction.memo, db=db)
 
-    d = { 
+    response: Dict[str, Any] = { 
         "id": transaction.id,
         "memo": transaction.memo,
     }
+    
 
-    locality = dict()
-    state = tm.state()
+    locality: Dict[str, Dict] = {"names": {}}
+    state: Dict[String, StateName] = tm.state()
     if state is not None:
         locality["state"] = dict({
             "name": state.name,
         })
 
-        postcode = tm.postcode(locality=tm.tokenized[-2], state=state)
-        print(postcode)
+        postcode: List[Postcode] = tm.postcode(locality=tm.tokenized[-2], state=state)
         if len(postcode) >= 1:
-            names = []
+            names: Dict[int, Dict] = {}
             for i in postcode:
-                d2 = dict({"name": i.locality, "postcode": i.postcode})
+                locality_name: LocalityName = dict({"name": i.locality, "postcode": i.postcode})
+
                 if i.sa3:
-                    d2["sa3"] = dict({
+                    locality_name["sa3"] = dict({
                         "name": i.sa3.name,
                     })
+
                 if i.sa4:
-                    d2["sa4"] = dict({
+                    locality_name["sa4"] = dict({
                         "name": i.sa4.name,
                     })
-                names.append(d2)
+
+                weight: int = 0
+                for i in range(100, 1, -1):
+                    if i in names:
+                        continue
+                    weight = i
+                    break
+
+                names[weight]: LocalityName = locality_name
 
             locality["names"] = names
         
 
-    d["locality"] = locality
+    response["locality"] = locality
 
-    return jsonify(d)
+    return jsonify(response)
 
 class TransactionMeta:
     def __init__(self, memo: str, db) -> None:
