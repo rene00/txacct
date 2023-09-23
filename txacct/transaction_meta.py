@@ -1,7 +1,7 @@
 from .model import State, Postcode
 from typing import List
 from nltk.tokenize import word_tokenize
-from sqlalchemy import func
+from sqlalchemy import func, select
 from sqlalchemy.exc import NoResultFound
 
 
@@ -24,6 +24,13 @@ class TransactionMeta:
             )
         except NoResultFound:
             s = None
+
+        if s is None:
+            for row in self.db.session.execute(select(State)).all():
+                state = row[0]
+                if l.lower().endswith(state.name.lower()):
+                    return state
+
         return s
 
     def postcode(self, locality: str, state: State) -> List[Postcode]:
