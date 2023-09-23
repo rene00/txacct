@@ -14,24 +14,13 @@ class TransactionMeta:
     def state(self) -> State | None:
         """state returns the Australian state of the transaction."""
 
-        # Take last item from tokenized and see if its a match on state.
         l: str = self.tokenized[-1]
-        try:
-            s = (
-                self.db.session.query(State)
-                .filter(func.lower(State.name) == l.lower())
-                .one()
-            )
-        except NoResultFound:
-            s = None
+        for row in self.db.session.execute(select(State)).all():
+            state = row[0]
+            if l.lower().endswith(state.name.lower()):
+                return state
 
-        if s is None:
-            for row in self.db.session.execute(select(State)).all():
-                state = row[0]
-                if l.lower().endswith(state.name.lower()):
-                    return state
-
-        return s
+        return None
 
     def postcode(self, locality: str, state: State) -> List[Postcode]:
         return (
