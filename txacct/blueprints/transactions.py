@@ -40,17 +40,21 @@ def transactions() -> Response:
             }
         )
 
-        postcode: List[Postcode] = tm.postcode(locality=tm.tokenized[-2], state=state)
-        if len(postcode) >= 1:
+        postcodes: List[Postcode] = tm.postcode()
+        if len(postcodes) >= 1:
             names = dict()
-            for i in postcode:
-                locality_name = {"name": i.locality, "postcode": i.postcode}
+            for i in postcodes:
+                postcode = i[0]
+                locality_name = {
+                    "name": postcode.locality,
+                    "postcode": postcode.postcode,
+                }
 
-                if i.sa3:
-                    locality_name["sa3"] = {"name": i.sa3.name}
+                if postcode.sa3:
+                    locality_name["sa3"] = {"name": postcode.sa3.name}
 
-                if i.sa4:
-                    locality_name["sa4"] = {"name": i.sa4.name}
+                if postcode.sa4:
+                    locality_name["sa4"] = {"name": postcode.sa4.name}
 
                 weight: int = 0
                 for i in range(100, 1, -1):
