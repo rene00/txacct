@@ -69,4 +69,16 @@ def transactions() -> Response:
 
     response["locality"] = locality
 
+    organisation = tm.organisation()
+    if organisation is not None:
+        response["organisation"] = organisation.name
+
+    address = tm.address()
+    if address is not None:
+        response["address"] = address
+
+    business_code = tm.business_code()
+    if business_code is not None:
+        response["description"] = business_code.description
+
     return jsonify(response)

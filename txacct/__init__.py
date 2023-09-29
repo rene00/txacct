@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_migrate import Migrate
 from .blueprints.transactions import transactions_bp
-from .cli import postcode_cli, nltk_cli
+from .cli import postcode_cli, nltk_cli, organisation_cli
 from .model import db
 
 
@@ -14,6 +14,8 @@ def create_app(test_config: dict | None = None) -> Flask:
     db.init_app(app)
     Migrate(app, db)
     app.register_blueprint(transactions_bp)
-    app.cli.add_command(postcode_cli)
-    app.cli.add_command(nltk_cli)
+
+    for i in postcode_cli, nltk_cli, organisation_cli:
+        app.cli.add_command(i)
+
     return app

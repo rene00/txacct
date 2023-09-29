@@ -35,3 +35,43 @@ tasks:
           --publish {{ .HOST_PORT }}:5000 \
           --env-file ~/.txacct.env \
           --name txacct {{.CONTAINER_REGISTRY}}/{{.CONTAINER_IMAGE_NAME}}:{{.CONTAINER_TAG}}
+  organisation:import:
+    desc: "import orgnisation data"
+    summary: |
+      Import organisation data for a single region
+
+      Pass [1-6] to this task to import the corresponding region organisation data.
+    silent: true
+    cmds:
+      - |
+        case "{{.CLI_ARGS}}" in
+          1)
+            filename={{.TXACCT_ORGANISATION_IMPORTER_1_FILENAME}}
+            worksheet={{.TXACCT_ORGANISATION_IMPORTER_1_WORKSHEET}}
+          ;;
+          2)
+            filename={{.TXACCT_ORGANISATION_IMPORTER_2_FILENAME}}
+            worksheet={{.TXACCT_ORGANISATION_IMPORTER_2_WORKSHEET}}
+          ;;
+          3)
+            filename={{.TXACCT_ORGANISATION_IMPORTER_3_FILENAME}}
+            worksheet={{.TXACCT_ORGANISATION_IMPORTER_3_WORKSHEET}}
+          ;;
+          4)
+            filename={{.TXACCT_ORGANISATION_IMPORTER_4_FILENAME}}
+            worksheet={{.TXACCT_ORGANISATION_IMPORTER_4_WORKSHEET}}
+          ;;
+          5)
+            filename={{.TXACCT_ORGANISATION_IMPORTER_5_FILENAME}}
+            worksheet={{.TXACCT_ORGANISATION_IMPORTER_5_WORKSHEET}}
+          ;;
+          6)
+            filename={{.TXACCT_ORGANISATION_IMPORTER_6_FILENAME}}
+            worksheet={{.TXACCT_ORGANISATION_IMPORTER_6_WORKSHEET}}
+          ;;
+          7)
+            filename={{.TXACCT_ORGANISATION_IMPORTER_7_FILENAME}}
+            worksheet={{.TXACCT_ORGANISATION_IMPORTER_7_WORKSHEET}}
+          ;;
+        esac
+        poetry run flask organisation import --filename=${filename} --worksheet=${worksheet} --organisation-source={{.TXACCT_ORGANISATION_SOURCE}}
