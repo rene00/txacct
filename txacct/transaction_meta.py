@@ -1,4 +1,4 @@
-from .model import State, Postcode
+from .model import ANZSIC, Organisation, State, Postcode, BusinessCode
 from typing import List
 from nltk.tokenize import word_tokenize
 from sqlalchemy import func, select, or_, and_
@@ -65,3 +65,44 @@ class TransactionMeta:
                 and_(or_(*conditions), Postcode.state_id == state.id)
             )
         ).all()
+
+    def organisation(self) -> Organisation | None:
+        # The name to use when searching for the organisation.
+        name = self.memo
+
+        state = self.state()
+        if state is not None:
+            # Remove the state from the organisation name.
+            name = name.replace(state.name, "")
+
+        postcode = self.postcode()
+        if postcode is not None and len(postcode) >= 1:
+            # Remove the locality from the organisation name.
+            name = name.replace(postcode[0][0].locality, "")
+
+        # strip leading whitespace from the organistaion name.
+        name = name.rstrip()
+
+        return self.db.session.scalars(
+            select(Organisation, BusinessCode)
+            .where(func.lower(Organisation.name) == name.lower())
+            .join_from(Organisation, BusinessCode)
+        ).first()
+
+    def address(self) -> str | None:
+        organisation = self.organisation()
+        if organisation is None:
+            return None
+        return organisation.address
+
+    def business_code(self) -> BusinessCode | None:
+        o = self.organisation()
+        if o is None:
+            return None
+        return o.business_code
+
+    def anzsic(self):
+        o = self.organisation()
+        if o is None:
+            return None
+        return o.anzsic

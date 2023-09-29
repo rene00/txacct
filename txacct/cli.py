@@ -5,16 +5,26 @@ import requests
 import click
 import json
 from txacct.model import db
-from .model import StatisticalArea3, StatisticalArea4, State, Postcode
+from .model import (
+    StatisticalArea3,
+    StatisticalArea4,
+    State,
+    Postcode,
+)
+from .importer import Importer
 from sqlalchemy.exc import IntegrityError
+from pathlib import Path
 
-postcode_cli = AppGroup("postcode")
+
 nltk_cli = AppGroup("nltk")
 
 
 @nltk_cli.command("download")
 def nltk_download():
     nltk.download("punkt")
+
+
+postcode_cli = AppGroup("postcode")
 
 
 @postcode_cli.command("import")
@@ -86,3 +96,37 @@ def postcode_import():
             db.session.rollback()
 
     return None
+
+
+organisation_cli = AppGroup("organisation")
+
+
+@organisation_cli.command("import")
+@click.option(
+    "--filename", type=Path, required=True, help="The file path to the org data"
+)
+@click.option("--worksheet", type=str, required=True, help="The worksheet to import")
+@click.option(
+    "--organisation-source",
+    type=str,
+    required=True,
+    help="The name of the organisation source for the data",
+)
+@click.option(
+    "--print-headers",
+    type=bool,
+    required=False,
+    default=False,
+    help="Print worksheet headers and then exit import",
+)
+@with_appcontext
+def organisation_import(filename, worksheet, organisation_source, print_headers):
+    importer = Importer(
+        db.session,
+        organisation_data=True,
+        filename=filename,
+        worksheet=worksheet,
+        organisation_source=organisation_source,
+        print_headers=print_headers,
+    )
+    importer.do()

@@ -1,11 +1,9 @@
 import pytest
-import tempfile
 from flask import Flask
 from flask_migrate import upgrade
 from txacct import create_app
 from txacct.importer import Importer
 from txacct.model import db as _db
-import os
 
 postcodes = [
     {
@@ -37,22 +35,29 @@ postcodes = [
     },
 ]
 
+from pytest_postgresql.janitor import DatabaseJanitor
+
+TEST_DB = "txacct"
+
+
 @pytest.fixture
-def app():
-    db_fd, db_path = tempfile.mkstemp()
-    app: Flask = create_app(
-        dict(
-            SQLALCHEMY_DATABASE_URI="sqlite:///{0}".format(db_path),
-        )
-    )
+def connection(postgresql_proc):
+    USER = postgresql_proc.user
+    HOST = postgresql_proc.host
+    PORT = postgresql_proc.port
+    with DatabaseJanitor(USER, HOST, PORT, TEST_DB, 12.2):
+        yield f"postgresql://{USER}:@{HOST}:{PORT}/{TEST_DB}"
+
+
+@pytest.fixture
+def app(connection):
+    app: Flask = create_app(dict(SQLALCHEMY_DATABASE_URI=connection))
 
     with app.app_context():
         upgrade()
         Importer(_db.session, postcode_data=postcodes).do()
 
     yield app
-    os.close(db_fd)
-    os.unlink(db_path)
 
 
 @pytest.fixture
