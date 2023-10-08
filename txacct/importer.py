@@ -230,8 +230,6 @@ class Importer:
             if i == 0:
                 if not self.print_headers:
                     continue
-                for cell in row:
-                    print(f"DEBUG:{cell.column},{cell.value}")
                 return
 
             organisation = Organisation(

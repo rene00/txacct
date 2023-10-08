@@ -75,25 +75,39 @@ class TransactionMeta:
             # Remove the state from the organisation name.
             name = name.replace(state.name, "")
 
+        stmt = (
+            select(Organisation, BusinessCode)
+            .where(func.lower(Organisation.name) == name.rstrip().lower())
+            .join_from(Organisation, BusinessCode)
+        )
+
         postcode = self.postcode()
         if postcode is not None and len(postcode) >= 1:
             # Remove the locality from the organisation name.
-            name = name.replace(postcode[0][0].locality, "")
+            name = name.replace(postcode[0][0].locality, "").rstrip()
 
-        # strip leading whitespace from the organistaion name.
-        name = name.rstrip()
+            # Include the postcode on the join when selecting for organisation
+            # to increase accuracy.
+            stmt = (
+                select(Organisation, BusinessCode, Postcode)
+                .join_from(Organisation, BusinessCode)
+                .join_from(Organisation, Postcode)
+                .where(func.lower(Organisation.name) == name.lower())
+                .where(Postcode.id == postcode[0][0].id)
+            )
 
-        return self.db.session.scalars(
-            select(Organisation, BusinessCode)
-            .where(func.lower(Organisation.name) == name.lower())
-            .join_from(Organisation, BusinessCode)
-        ).first()
+        return self.db.session.scalars(stmt).first()
 
     def address(self) -> str | None:
         organisation = self.organisation()
         if organisation is None:
             return None
-        return organisation.address
+        address = organisation.address
+
+        if organisation.postcode:
+            address = f"{address}, {organisation.postcode.locality}, {organisation.postcode.state.name}"
+
+        return address
 
     def business_code(self) -> BusinessCode | None:
         o = self.organisation()

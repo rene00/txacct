@@ -1,0 +1,43 @@
+/* static/css/style.css */
+
+:root {
+    --bg-color: white;
+    --text-color: black;
+    --main-color: black;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    color: var(--text-color);
+    font-size: 1.3em;
+    font-family: sans-serif;
+    display: grid;
+    justify-content: center;
+}
+
+label {
+    display: block;
+}
+
+label span {
+    min-width: 9ch;
+    display: inline-block;
+}
+
+input {
+    border: 1px solid var(--main-color);
+    color: inherit;
+    padding: 0.3em;
+}
+
+.search-input {
+    width: 400px;
+}
+
+.hidden {
+  display: none;
+}
+
