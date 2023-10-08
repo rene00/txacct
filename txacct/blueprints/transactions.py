@@ -73,6 +73,8 @@ def transactions() -> Response:
     if organisation is not None:
         response["organisation"] = organisation.name
 
+        # if organisation is found, set the postcode
+
     address = tm.address()
     if address is not None:
         response["address"] = address
