@@ -34,12 +34,19 @@ class CreateSearchForm {
     const transactionCard = document.querySelector(".transaction-card");
     const transactionContent = transactionCard.querySelector(".transaction-content");
 
+    const notFound = transactionContent.querySelector(".not-found");
+
     const organisation = transactionContent.querySelector(".organisation");
     if (data.hasOwnProperty("organisation")) {
       organisation.textContent = "Organisation: " + data.organisation;
       organisation.classList.remove("hidden");
+
+      notFound.classList.add("hidden");
     } else {
       organisation.classList.add("hidden");
+
+      notFound.textContent = "Not found";
+      notFound.classList.remove("hidden");
     }
 
     const address = transactionContent.querySelector(".address");

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-*">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/transaction.css') }}">
   <script src="{{ url_for('static', filename='js/index.js') }}" type="module"></script>
@@ -19,6 +20,9 @@
 
   <div class="transaction-card">
     <div class="transaction-content">
+      <label>
+        <span class="not-found hidden"></span>
+      </label>
       <label>
         <span class="organisation hidden"></span>
       </label>
