@@ -34,7 +34,7 @@ input {
 }
 
 .search-input {
-    width: 400px;
+    min-width: 128px;
 }
 
 .hidden {
