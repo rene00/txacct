@@ -31,6 +31,8 @@ class CreateSearchForm {
   handleTransactionResponse(rawData) {
     const data = JSON.parse(rawData);
 
+    // console.log(JSON.stringify(data))
+
     const transactionCard = document.querySelector(".transaction-card");
     const transactionContent = transactionCard.querySelector(".transaction-content");
 
