@@ -31,49 +31,23 @@ def transactions() -> Response:
         "memo": transaction.memo,
     }
 
-    locality: Dict[str, Dict] = {"names": {}}
+    response["locality"] = {}
+
     state = tm.state()
     if state is not None:
-        locality["state"] = dict(
-            {
-                "name": state.name,
-            }
-        )
+        response["locality"]["state"] = state.name
 
-        postcodes: List[Postcode] = tm.postcode()
-        if len(postcodes) >= 1:
-            names = dict()
-            for i in postcodes:
-                postcode = i[0]
-                locality_name = {
-                    "name": postcode.locality,
-                    "postcode": postcode.postcode,
-                }
-
-                if postcode.sa3:
-                    locality_name["sa3"] = {"name": postcode.sa3.name}
-
-                if postcode.sa4:
-                    locality_name["sa4"] = {"name": postcode.sa4.name}
-
-                weight: int = 0
-                for i in range(100, 1, -1):
-                    if i in names:
-                        continue
-                    weight = i
-                    break
-
-                names[weight] = locality_name
-
-            locality["names"] = names
-
-    response["locality"] = locality
+    postcode = tm.postcode()
+    if postcode is not None:
+        response["locality"]["postcode"] = postcode.postcode
+        response["locality"]["name"] = postcode.locality
 
     organisation = tm.organisation()
     if organisation is not None:
         response["organisation"] = organisation.name
 
-        # if organisation is found, set the postcode
+    if not bool(response["locality"]):
+        del response["locality"]
 
     address = tm.address()
     if address is not None:

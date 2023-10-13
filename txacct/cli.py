@@ -1,6 +1,5 @@
 from flask.cli import AppGroup, with_appcontext
 from flask import current_app
-import nltk
 import requests
 import click
 import json
@@ -15,13 +14,6 @@ from .importer import Importer
 from sqlalchemy.exc import IntegrityError
 from pathlib import Path
 
-
-nltk_cli = AppGroup("nltk")
-
-
-@nltk_cli.command("download")
-def nltk_download():
-    nltk.download("punkt")
 
 
 postcode_cli = AppGroup("postcode")

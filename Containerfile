@@ -17,8 +17,6 @@ COPY poetry.lock pyproject.toml boot.sh .
 
 RUN poetry install --no-dev
 
-RUN poetry run python -m nltk.downloader punkt
-
 COPY txacct ./txacct
 
 COPY migrations ./migrations
