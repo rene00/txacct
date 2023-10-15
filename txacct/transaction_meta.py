@@ -182,14 +182,35 @@ class TransactionMeta:
         self.nlp.add_pipe("postcode", config={"label": "POSTCODE"})
         self.doc = self.nlp(memo)
 
-        self.__cache = {}
+        self.__postcode: Postcode | None = None
+        self.__organisation: Organisation | None = None
 
     def state(self) -> State | None:
         """state returns the Australian state of the transaction."""
         return self.doc._.state
 
     def postcode(self) -> Postcode | None:
+        if self.__postcode is not None:
+            return Postcode
         return self.doc._.postcode
+
+    def __query_skip_token(self, token: Token) -> bool:
+        if token._.is_locality:
+            return True
+
+        # skip key is token index. The value is the text if matched with
+        # token.text. If found in token, skip this token when adding it to the
+        # query.
+        skip = {
+            0: ["SP"],
+        }
+        s = skip.get(token.i)
+        if s is not None:
+            for i in s:
+                if token.text.lower() == i.lower():
+                    return True
+
+        return False
 
     def __organisation_query(self) -> list:
         """
@@ -199,9 +220,11 @@ class TransactionMeta:
           - Split token.text if contains CamelCase (i.e. MelbournePool)
         """
         queries = []
+
         for token in self.doc:
-            if token._.is_locality:
+            if self.__query_skip_token(token):
                 continue
+
             if len(queries) == 0:
                 query = token.text
             else:
@@ -209,44 +232,89 @@ class TransactionMeta:
             queries.append(query)
         return queries
 
+    def __organisation_query_postcodes(
+        self, postcode: Postcode, conditions, queries
+    ) -> Organisation | None:
+        """
+        Attempt to find an organisation by searching with conditions and
+        joining on Postcode using a where id on Postcode from all Postcodes
+        which match the same postcode.
+
+        A transaction can have a postcode token which is not the same postcode in Organisation. The transaction postcode will share the same Postcode.postcode but not the same Postcode.locality as the Organisation.
+
+        This query function will iterate over all found postcodes and attempt
+        to query Organisation on similar postcodes checking for a match using conditions.
+        """
+
+        for __postcode in self.db.session.scalars(
+            select(Postcode)
+            .where(Postcode.postcode == postcode.postcode)
+            .where(Postcode.id != postcode.id)
+        ).all():
+            organisations = self.db.session.scalars(
+                select(Organisation, BusinessCode, Postcode)
+                .join_from(Organisation, BusinessCode)
+                .join_from(Organisation, Postcode)
+                .where(Postcode.id == __postcode.id)
+                .where(or_(*conditions))
+            ).all()
+
+            # Order is important of queries. It's important to start matching
+            # on the longest query first. This is done by using sorted() with
+            # key=len (length of item in list) which sorts shortest first and
+            # then reversing the new list.
+            for s in reversed(sorted(queries, key=len)):
+                p = re.compile(rf"^{s}\S+$", re.IGNORECASE)
+                for organisation in organisations:
+                    if p.match(organisation.name):
+                        return organisation
+        return None
+
     def organisation(self) -> Organisation | None:
-        cache = self.__cache.get("organisation")
-        if cache is not None:
-            return cache
+        if self.__organisation is not None:
+            return self.__organisation
 
         postcode = self.postcode()
-
         ret = None
         queries = self.__organisation_query()
+        stmt = select(Organisation, BusinessCode).join_from(Organisation, BusinessCode)
+
+        if postcode is not None:
+            stmt = (
+                select(Organisation, BusinessCode, Postcode)
+                .join_from(Organisation, BusinessCode)
+                .join_from(Organisation, Postcode)
+                .where(Postcode.id == postcode.id)
+            )
+
+        conditions = []
+        from sqlalchemy import and_, or_
+
         for query in reversed(queries):
             search = f"{query}%".lower()
-            if postcode is None:
-                stmt = (
-                    select(Organisation, BusinessCode)
-                    .where(Organisation.name.ilike(search))
-                    .join_from(Organisation, BusinessCode)
-                )
-            else:
-                stmt = (
-                    select(Organisation, BusinessCode, Postcode)
-                    .join_from(Organisation, BusinessCode)
-                    .join_from(Organisation, Postcode)
-                    .where(Organisation.name.ilike(search))
-                    .where(Postcode.id == postcode.id)
-                )
+            conditions.append(Organisation.name.ilike(search))
 
-            # IMPROVEMENT: instead of returning first, return all() and provide
-            # suggested results to client.
-            ret = self.db.session.scalars(stmt).first()
+        stmt = stmt.where(or_(*conditions))
+        rows = self.db.session.scalars(stmt).all()
+        ret = None
+        for row in rows:
             if ret is not None:
                 break
+            for s in queries:
+                if row.name.lower() == s.lower():
+                    ret = row
+                    break
 
-        self.__cache["organisation"] = ret
+        if ret is None and postcode is not None:
+            ret = self.__organisation_query_postcodes(postcode, conditions, queries)
+
+        if ret is not None:
+            self.__organisation = ret
 
         return ret
 
     def address(self) -> str | None:
-        organisation = self.organisation()
+        organisation = self.__organisation
         if organisation is None:
             return None
         address = organisation.address
@@ -257,13 +325,13 @@ class TransactionMeta:
         return address
 
     def business_code(self) -> BusinessCode | None:
-        o = self.organisation()
-        if o is None:
+        organisation = self.__organisation
+        if organisation is None:
             return None
-        return o.business_code
+        return organisation.business_code
 
     def anzsic(self):
-        o = self.organisation()
-        if o is None:
+        organisation = self.__organisation
+        if organisation is None:
             return None
-        return o.anzsic
+        return organisation.anzsic
