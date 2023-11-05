@@ -19,6 +19,7 @@ tasks:
     cmds:
       - poetry run flask db migrate
   db:upgrade:
+    desc: "db upgrade"
     cmds:
       - poetry run flask db upgrade
   postcode:import:
@@ -36,6 +37,17 @@ tasks:
           --publish {{ .HOST_PORT }}:5000 \
           --env-file ~/.txacct.env \
           --name txacct {{.CONTAINER_REGISTRY}}/{{.CONTAINER_IMAGE_NAME}}:{{.CONTAINER_TAG}}
+  organisation:import:all:
+    desc: "import all orgnisation data"
+    summary: |
+      Import all organisation data
+    silent: true
+    cmds:
+      - |
+        for i in $(seq 1 6); do
+          task organisation:import -- $i
+        done
+
   organisation:import:
     desc: "import orgnisation data"
     summary: |

@@ -164,8 +164,8 @@ class StateComponent:
                 # Multiple postcodes can be found with the above query. Select
                 # the first postcode. This can be improved though for now it's
                 # good enough.
-                state = rows[0]
-                doc._.set("state", state.name)
+                postcode = rows[0][0]
+                doc._.set("state", postcode.state)
                 token._.set("is_locality", True)
                 break
 
