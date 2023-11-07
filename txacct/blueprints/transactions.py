@@ -21,8 +21,6 @@ def transactions() -> Response:
         abort(400)
 
     transaction: Transaction = Transaction(memo=memo)
-    db.session.add(transaction)
-    db.session.commit()
 
     tm = TransactionMeta(memo=transaction.memo, db=db)
 
