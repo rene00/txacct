@@ -1,5 +1,5 @@
 version: '3'
-dotenv: ['{{.HOME}}/.txacct.env']
+dotenv: ['{{.HOME}}/.txacct.env', '.env']
 vars:
   CONTAINER_TAG:
     sh: git log -n1 --format=%h
@@ -9,7 +9,7 @@ tasks:
   run:
     desc: "run app"
     cmds:
-      - poetry run flask run 
+      - poetry run flask run --host "$FLASK_HOST" --port "$FLASK_PORT"
   db:init:
     desc: "db init"
     cmds:

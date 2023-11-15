@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% if current_page == 'home' %}<script src="{{ url_for('static', filename='js/index.js') }}" type="module"></script>{% endif %}
+</head>
+<body>
+
+  <div class="container">
+
+    <header>
+      <nav>
+        <ul>
+          <li {% if current_page == 'home' %}class="active"{% endif %}><a href="{{ url_for('home.home') }}">Home</a></li>
+          <li {% if current_page == 'about' %}class="active"{% endif %}><a href="{{ url_for('home.about') }}">About</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    {% block content %}
+    {% endblock %}
+
+  </div>
+</body>
+</html>

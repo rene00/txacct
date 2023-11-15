@@ -10,12 +10,36 @@
     box-sizing: border-box;
 }
 
+h1 {
+    width: 100%;
+}
+
 body {
     color: var(--text-color);
     font-size: 1.3em;
     font-family: sans-serif;
     display: grid;
     justify-content: center;
+}
+
+.container {
+    margin: 10%;
+    width: 70%;
+}
+
+.search {
+    font-size: 1.4em;
+    width: 90%;
+}
+
+.short-description {
+    font-size: 1.4em;
+    width: 90%;
+}
+
+.long-description {
+    font-size: .9em;
+    width: 90%;
 }
 
 label {
@@ -33,11 +57,53 @@ input {
     padding: 0.3em;
 }
 
-.search-input {
-    min-width: 128px;
+h1 {
+    min-width: 100px;
+    white-space: nowrap;
+    @media (max-width: 768px) {
+        white-space: normal; /* Change to default for mobile */
+    }
+}
+
+input.search-input {
+    border: 1px solid var(--main-color);
+    color: inherit;
+    padding: 0.3em;
+    /* min-width: 240px; */
+    min-width: 120%;
 }
 
 .hidden {
   display: none;
 }
 
+
+nav {
+    padding: 10px 0;
+    position: relative;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    justify-content: flex-start;
+    padding: 0;
+}
+
+nav li {
+    margin-left: 0px;
+    margin-right: 10px;
+}
+
+nav li a {
+    text-decoration: none;
+}
+
+nav li.active a {
+    pointer-events: none;
+}
+
+.transaction-card {
+    margin-right: 1em 0;
+    padding: 0.3em 1em;
+}
