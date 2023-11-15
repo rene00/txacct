@@ -8,7 +8,7 @@ export class Search {
   }
 
   activeSearchForm() {
-    const searchForm = document.querySelector(".search-card form");
+    const searchForm = document.querySelector(".search form");
     new CreateSearchForm(searchForm);
   }
 }
