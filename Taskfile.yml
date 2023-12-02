@@ -26,9 +26,11 @@ tasks:
     cmds:
       - poetry run flask postcode import
   container:build:
+    desc: "container build"
     cmds:
       - podman build . -t {{.CONTAINER_REGISTRY}}/{{.CONTAINER_IMAGE_NAME}}:{{.CONTAINER_TAG}} {{.PODMAN_BUILD_ARGS}}
   container:run:
+    desc: "container run"
     vars:
       HOST_PORT: 5000
     cmds:
@@ -47,7 +49,6 @@ tasks:
         for i in $(seq 1 6); do
           task organisation:import -- $i
         done
-
   organisation:import:
     desc: "import orgnisation data"
     summary: |
@@ -88,3 +89,19 @@ tasks:
           ;;
         esac
         poetry run flask organisation import --filename=${filename} --worksheet=${worksheet} --organisation-source={{.TXACCT_ORGANISATION_SOURCE}}
+  transactionsearchtest:install:
+    desc: "build transactionsearchtest"
+    silent: true
+    dir: go/transactionsearchtest
+    cmds:
+      - go install .
+  transactionsearchtest:run:prod:
+    deps: [transactionsearchtest:install]
+    desc: "run transactionsearchtest for prod"
+    cmds:
+      - transactionsearchtest -config-file $TRANSACTIONSEARCHTEST_CONFIG_FILE_PROD -url $TRANSACTIONSEARCHTEST_URL_PROD
+  transactionsearchtest:run:dev:
+    deps: [transactionsearchtest:install]
+    desc: "run transactionsearchtest for prod"
+    cmds:
+      - transactionsearchtest -config-file $TRANSACTIONSEARCHTEST_CONFIG_FILE_DEV -url $TRANSACTIONSEARCHTEST_URL_DEV
