@@ -240,10 +240,14 @@ class TransactionMeta:
         joining on Postcode using a where id on Postcode from all Postcodes
         which match the same postcode.
 
-        A transaction can have a postcode token which is not the same postcode in Organisation. The transaction postcode will share the same Postcode.postcode but not the same Postcode.locality as the Organisation.
+        A transaction can have a postcode token which is not the same postcode
+        in Organisation. The transaction postcode will share the same
+        Postcode.postcode but not the same Postcode.locality as the
+        Organisation.
 
         This query function will iterate over all found postcodes and attempt
-        to query Organisation on similar postcodes checking for a match using conditions.
+        to query Organisation on similar postcodes checking for a match using
+        conditions.
         """
 
         for __postcode in self.db.session.scalars(
