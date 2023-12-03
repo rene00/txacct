@@ -10,9 +10,8 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"transactionsearchtest/internal/client"
-	"transactionsearchtest/internal/config"
 
+	"golang.org/x/vuln/client"
 	"gopkg.in/yaml.v3"
 )
 
