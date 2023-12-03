@@ -14,6 +14,9 @@ func (t *Tokenize) Parse(s string) {
 	previousToken := &Token{}
 	for idx, field := range strings.Fields(s) {
 		token := &Token{value: field, position: idx, previous: previousToken}
+		if idx == 0 {
+			token.previous = nil
+		}
 		t.tokens = append(t.tokens, token)
 		previousToken = token
 	}

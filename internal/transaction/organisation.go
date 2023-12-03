@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"regexp"
 	"strings"
 	"transactionsearch/internal/tokenize"
 	"transactionsearch/models"
@@ -18,33 +19,37 @@ func NewTransactionOrganisation() TransactionHandler {
 }
 
 func (to TransactionOrganisation) Handle(ctx context.Context, db *sql.DB, transaction *Transaction) error {
-	var q []qm.QueryMod
 
 	if transaction.postcode != nil {
-		q = []qm.QueryMod{
-			qm.InnerJoin("business_code bc on organisation.business_code_id = bc.id"),
-			qm.InnerJoin(fmt.Sprintf("postcode p on organisation.postcode_id = %d", transaction.postcode.ID)),
-		}
 
 		var likeQueryContents []string
 
 		likeQueryContents = to.buildLikeQueryContents(*transaction)
 		for i := len(likeQueryContents) - 1; i >= 0; i-- {
 			v := likeQueryContents[i]
-			q = append(q, qm.Or("name ILIKE ?", v+"%"))
-		}
+			var q []qm.QueryMod
+			q = []qm.QueryMod{
+				qm.InnerJoin("business_code bc on organisation.business_code_id = bc.id"),
+				qm.InnerJoin(fmt.Sprintf("postcode p on organisation.postcode_id = %d", transaction.postcode.ID)),
+				qm.Where("name ILIKE ?", v+"%"),
+			}
+			organisations, err := models.Organisations(q...).All(ctx, db)
+			if err != nil {
+				return err
+			}
 
-		organisations, err := models.Organisations(q...).All(ctx, db)
-		if err != nil {
-			return err
-		}
+			for _, organisation := range organisations {
+				for i := len(likeQueryContents) - 1; i >= 0; i-- {
+					q := likeQueryContents[i]
 
-		for _, organisation := range organisations {
-			for i := len(likeQueryContents) - 1; i >= 0; i-- {
-				q := likeQueryContents[i]
-				if strings.ToLower(q) == strings.ToLower(organisation.Name) {
-					transaction.organisation = organisation
-					return nil
+					re, err := regexp.Compile("(?i)" + q)
+					if err != nil {
+						return err
+					}
+					if re.MatchString(organisation.Name) {
+						transaction.organisation = organisation
+						return nil
+					}
 				}
 			}
 		}
@@ -88,12 +93,13 @@ func (to TransactionOrganisation) buildLikeQueryContents(transaction Transaction
 		if to.querySkipToken(*token) {
 			continue
 		}
-		v := token.ValueString()
-		previousToken := token.Previous()
-		if previousToken != nil {
-			v = fmt.Sprintf("%s %s", token.Previous().ValueString(), token.ValueString())
+
+		if token.Previous() == nil {
+			s = append(s, token.ValueString())
+			continue
 		}
-		s = append(s, strings.TrimPrefix(v, " "))
+
+		s = append(s, fmt.Sprintf("%s %s", s[len(s)-1], token.ValueString()))
 	}
 	return s
 }

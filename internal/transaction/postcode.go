@@ -59,6 +59,11 @@ func (tp TransactionPostcode) Handle(ctx context.Context, db *sql.DB, transactio
 					transaction.postcode = postcode
 					transaction.state = state
 					token.SetLocality(true)
+					for _, s := range strings.Split(postcode.Locality, " ") {
+						if strings.ToLower(token.Previous().ValueString()) == strings.ToLower(s) {
+							token.Previous().SetLocality(true)
+						}
+					}
 					return nil
 				}
 			}
