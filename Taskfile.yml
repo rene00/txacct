@@ -89,19 +89,27 @@ tasks:
           ;;
         esac
         poetry run flask organisation import --filename=${filename} --worksheet=${worksheet} --organisation-source={{.TXACCT_ORGANISATION_SOURCE}}
-  transactionsearchtest:install:
-    desc: "build transactionsearchtest"
-    silent: true
-    dir: go/transactionsearchtest
-    cmds:
-      - go install .
   transactionsearchtest:run:prod:
-    deps: [transactionsearchtest:install]
+    deps: [transactionsearch:build]
     desc: "run transactionsearchtest for prod"
     cmds:
-      - transactionsearchtest -config-file $TRANSACTIONSEARCHTEST_CONFIG_FILE_PROD -url $TRANSACTIONSEARCHTEST_URL_PROD
+      - ./transactionsearchtest -config-file $TRANSACTIONSEARCHTEST_CONFIG_FILE_PROD -url $TRANSACTIONSEARCHTEST_URL_PROD
   transactionsearchtest:run:dev:
-    deps: [transactionsearchtest:install]
+    deps: [transactionsearch:build]
     desc: "run transactionsearchtest for prod"
     cmds:
-      - transactionsearchtest -config-file $TRANSACTIONSEARCHTEST_CONFIG_FILE_DEV -url $TRANSACTIONSEARCHTEST_URL_DEV
+      - ./transactionsearchtest -config-file $TRANSACTIONSEARCHTEST_CONFIG_FILE_DEV -url $TRANSACTIONSEARCHTEST_URL_DEV
+  sqlboiler:sqlboiler:
+    desc: "run sqlboiler psql"
+    cmds:
+      - sqlboiler --config transactionsearch.toml psql
+  transactionsearch:build:
+    desc: "build transactionsearch"
+    cmds:
+      - go build -o ./transactionsearch ./cmd/transactionsearch
+      - go build -o ./transactionsearchtest ./cmd/transactionsearchtest
+  transactionsearch:run:
+    desc: "runtransactionsearch"
+    deps: [transactionsearch:build]
+    cmds:
+      - ./transactionsearch

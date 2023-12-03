@@ -1,11 +1,15 @@
 name: container
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - '*'
     branches:
       - 'main'
+  pull_request:
+    branches:
+      - 'master'
 
 env:
   REGISTRY_USER: ${{ github.actor }}

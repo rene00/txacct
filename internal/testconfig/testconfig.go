@@ -1,4 +1,4 @@
-package config
+package testconfig
 
 type Config struct {
 	Tests []Test `yaml:"tests"`

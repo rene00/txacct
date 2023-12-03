@@ -64,3 +64,6 @@ target/
 files/
 
 # txacct
+transactionsearch.toml
+transactionsearch
+transactionsearchtest
