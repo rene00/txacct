@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"transactionsearch/db/migrations"
 	"transactionsearch/internal/router"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -31,6 +32,11 @@ func main() {
 		httpPort = "3000"
 	}
 
+	doMigrate := false
+	if s, ok := os.LookupEnv("TS_DO_MIGRATE"); ok && s == "1" {
+		doMigrate = true
+	}
+
 	db, err := sql.Open("pgx", postgresURI)
 	if err != nil {
 		log.Fatal(err)
@@ -38,6 +44,13 @@ func main() {
 	defer db.Close()
 
 	boil.SetDB(db)
+
+	if doMigrate {
+		err = migrations.DoMigrateDb(postgresURI)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 
 	rtr := router.NewRouter(db)
 	listenAddrPort := fmt.Sprintf("%s:%s", httpHost, httpPort)
