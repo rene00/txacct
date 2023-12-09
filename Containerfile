@@ -1,29 +1,17 @@
-FROM docker.io/python:3.11-slim
+# base image
+FROM docker.io/library/golang:1.21.4-bookworm as base
 
-ENV PATH "/root/.local/bin:$PATH"
+WORKDIR /builder
 
-ENV PSYCOPG_IMPL "c"
+COPY go.mod go.sum /builder/
 
-WORKDIR /app
+RUN go mod download
 
-RUN apt-get update && apt-get install -y \
-    curl \
-    build-essential \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/* && \
-    curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
+COPY . .
 
-COPY poetry.lock pyproject.toml boot.sh .
+RUN mkdir -p /app && go build -ldflags "-s -w" -o /app/transactionsearch /builder/cmd/transactionsearch
 
-RUN poetry install --no-dev
+EXPOSE 3000
 
-COPY txacct ./txacct
-
-COPY migrations ./migrations
-
-RUN chmod a+x boot.sh
-
-ENTRYPOINT ["./boot.sh"]
-
-EXPOSE 5000
+CMD ["/app/transactionsearch"]
 
