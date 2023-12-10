@@ -2,14 +2,12 @@ name: container
 
 on:
   workflow_dispatch:
+  pull_request:
   push:
     tags:
       - '*'
     branches:
       - 'main'
-  pull_request:
-    branches:
-      - 'master'
 
 env:
   REGISTRY_USER: ${{ github.actor }}
@@ -36,6 +34,7 @@ jobs:
         with:
           image: txacct 
           tags: latest ${{ github.sha }}
+          platforms: linux/amd64, linux/arm64
           containerfiles: |
             ./Containerfile
 
