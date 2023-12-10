@@ -62,4 +62,7 @@ jobs:
           registry: ghcr.io/${{ github.actor }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          archs: amd64, arm64
+
+      -
+        name: Print image URLs
+        run: echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
