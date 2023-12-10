@@ -28,6 +28,12 @@ jobs:
           fetch-depth: 0
 
       -
+        name: Install qemu dependency
+        run: |
+          sudo apt-get update
+          sudo apt install -y qemu-user-static
+
+      -
         name: Build Image
         id: build-image
         uses: redhat-actions/buildah-build@v2
