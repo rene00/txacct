@@ -26,8 +26,11 @@ tasks:
       - poetry run flask db init
   db:migrate:
     desc: "db migrate"
+    desp: [build]
+    env:
+      TS_DO_MIGRATE: 1
     cmds:
-      - poetry run flask db migrate
+      - ./transactionsearch
   db:upgrade:
     desc: "db upgrade"
     cmds:

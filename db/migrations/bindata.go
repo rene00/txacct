@@ -83,7 +83,7 @@ func _1701590904_initDownSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "1701590904_init.down.sql", size: 0, mode: os.FileMode(420), modTime: time.Unix(1701590904, 0)}
+	info := bindataFileInfo{name: "1701590904_init.down.sql", size: 0, mode: os.FileMode(420), modTime: time.Unix(1702232558, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -103,7 +103,7 @@ func _1701590904_initUpSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "1701590904_init.up.sql", size: 6525, mode: os.FileMode(420), modTime: time.Unix(1701601406, 0)}
+	info := bindataFileInfo{name: "1701590904_init.up.sql", size: 6525, mode: os.FileMode(420), modTime: time.Unix(1702232558, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -123,7 +123,7 @@ func migrationsGo() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "migrations.go", size: 695, mode: os.FileMode(420), modTime: time.Unix(1702023013, 0)}
+	info := bindataFileInfo{name: "migrations.go", size: 695, mode: os.FileMode(420), modTime: time.Unix(1702232558, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
