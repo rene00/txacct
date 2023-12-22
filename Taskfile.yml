@@ -37,7 +37,6 @@ tasks:
       - poetry run flask db upgrade
   import:postcode:
     desc: "import postcode data"
-    deps: [db:upgrade]
     cmds:
       - poetry run flask postcode import
   container:build:
