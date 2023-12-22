@@ -229,3 +229,33 @@ ALTER TABLE ONLY public.organisation
 
 ALTER TABLE ONLY public.organisation
     ADD CONSTRAINT organisation_postcode_id_fkey FOREIGN KEY (postcode_id) REFERENCES public.postcode(id);
+
+/* transaction */
+
+CREATE TABLE public.transaction (
+    id integer NOT NULL,
+    memo character varying NOT NULL
+);
+
+CREATE SEQUENCE public.transaction_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE public.transaction_id_seq OWNED BY public.transaction.id;
+
+ALTER TABLE ONLY public.transaction ALTER COLUMN id SET DEFAULT nextval('public.transaction_id_seq'::regclass);
+
+ALTER TABLE ONLY public.transaction
+    ADD CONSTRAINT transaction_pkey PRIMARY KEY (id);
+
+/* alembic */
+CREATE TABLE public.alembic_version (
+    version_num character varying(32) NOT NULL
+);
+
+ALTER TABLE ONLY public.alembic_version
+    ADD CONSTRAINT alembic_version_pkc PRIMARY KEY (version_num);

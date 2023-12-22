@@ -1,6 +1,7 @@
 package testclient
 
 import (
+	"crypto/tls"
 	"io"
 	"net/http"
 	"net/url"
@@ -12,7 +13,10 @@ type Client struct {
 }
 
 func NewClient(URL *url.URL) Client {
-	httpClient := http.Client{}
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
+	}
+	httpClient := http.Client{Transport: tr}
 	return Client{httpClient: httpClient}
 }
 
