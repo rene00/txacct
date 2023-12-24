@@ -107,7 +107,7 @@ tasks:
     deps: [transactionsearch:build]
     desc: "run transactionsearchtest for prod"
     cmds:
-      - ./transactionsearchtest -config-file $TRANSACTIONSEARCHTEST_CONFIG_FILE_PROD -url $TRANSACTIONSEARCHTEST_URL_PROD
+      - ./transactionsearchtest -config-file $TRANSACTIONSEARCHTEST_CONFIG_FILE_PROD -url $TRANSACTIONSEARCHTEST_URL_PROD -insecure-skip-verify=true
   transactionsearchtest:run:dev:
     deps: [transactionsearch:build]
     desc: "run transactionsearchtest for prod"
