@@ -10,11 +10,36 @@ import (
 type Client struct {
 	httpClient http.Client
 	URL        *url.URL
+	Opts
 }
 
-func NewClient(URL *url.URL) Client {
+type Opts struct {
+	insecureSkipVerify bool
+}
+
+type OptFunc func(*Opts)
+
+func defaultOpts() Opts {
+	return Opts{
+		insecureSkipVerify: false,
+	}
+}
+
+func WithInsecureSkipVerify(b bool) OptFunc {
+	return func(opts *Opts) {
+		opts.insecureSkipVerify = b
+	}
+}
+
+func NewClient(URL *url.URL, opts ...OptFunc) Client {
+	o := defaultOpts()
+
+	for _, fn := range opts {
+		fn(&o)
+	}
+
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: o.insecureSkipVerify},
 	}
 	httpClient := http.Client{Transport: tr}
 	return Client{httpClient: httpClient}
