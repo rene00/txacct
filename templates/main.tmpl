@@ -1,0 +1,28 @@
+{{ define "main" }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/static/css/style.css">
+  {{ if (eq .CurrentPage "home") }}<script src="/static/js/index.js" type="module"></script>{{ end }}
+</head>
+<body>
+
+  <div class="container">
+
+    <header>
+      <nav>
+        <ul>
+          <li {{ if (eq .CurrentPage "home") }}class="active"{{ end }}><a href="/">Home</a></li>
+          <li {{ if (eq .CurrentPage "about") }}class="active"{{ end }}><a href="/about">About</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    {{ template "content" . }}
+
+  </div>
+</body>
+</html>
+{{ end }}
