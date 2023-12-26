@@ -20,40 +20,42 @@ func NewTransactionOrganisation() TransactionHandler {
 
 func (to TransactionOrganisation) Handle(ctx context.Context, db *sql.DB, transaction *Transaction) error {
 
-	if transaction.postcode != nil {
+	if transaction.postcode == nil {
+		return nil
+	}
 
-		var likeQueryContents []string
+	var likeQueryContents []string
 
-		likeQueryContents = to.buildLikeQueryContents(*transaction)
-		for i := len(likeQueryContents) - 1; i >= 0; i-- {
-			v := likeQueryContents[i]
-			var q []qm.QueryMod
-			q = []qm.QueryMod{
-				qm.InnerJoin("business_code bc on organisation.business_code_id = bc.id"),
-				qm.InnerJoin(fmt.Sprintf("postcode p on organisation.postcode_id = %d", transaction.postcode.ID)),
-				qm.Where("name ILIKE ?", v+"%"),
-			}
-			organisations, err := models.Organisations(q...).All(ctx, db)
-			if err != nil {
-				return err
-			}
+	likeQueryContents = to.buildLikeQueryContents(*transaction)
+	for i := len(likeQueryContents) - 1; i >= 0; i-- {
+		v := likeQueryContents[i]
+		var q []qm.QueryMod
+		q = []qm.QueryMod{
+			qm.InnerJoin(fmt.Sprintf("postcode p on organisation.postcode_id = %d", transaction.postcode.ID)),
+			qm.Where("name ILIKE ?", v+"%"),
+			qm.Load("BusinessCode"),
+		}
+		organisations, err := models.Organisations(q...).All(ctx, db)
+		if err != nil {
+			return err
+		}
 
-			for _, organisation := range organisations {
-				for i := len(likeQueryContents) - 1; i >= 0; i-- {
-					q := likeQueryContents[i]
+		for _, organisation := range organisations {
+			for i := len(likeQueryContents) - 1; i >= 0; i-- {
+				q := likeQueryContents[i]
 
-					re, err := regexp.Compile("(?i)" + q)
-					if err != nil {
-						return err
-					}
-					if re.MatchString(organisation.Name) {
-						transaction.organisation = organisation
-						return nil
-					}
+				re, err := regexp.Compile("(?i)" + q)
+				if err != nil {
+					return err
+				}
+				if re.MatchString(organisation.Name) {
+					transaction.organisation = organisation
+					return nil
 				}
 			}
 		}
 	}
+
 	return nil
 }
 

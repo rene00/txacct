@@ -1,0 +1,29 @@
+{{ define "content" }}
+<h1>Transaction Search</h1>
+
+<div class="search">
+  <form>
+    <label>
+      <input name="memo" type="text" value="" class="search-input"/>
+      <span><button data-action="search">search</button></span>
+    </label>
+  </form>
+</div>
+
+<div class="transaction-card">
+  <div class="transaction-content">
+    <label>
+      <span class="not-found hidden"></span>
+    </label>
+    <label>
+      <span class="organisation hidden"></span>
+    </label>
+    <label>
+      <span class="address hidden"></span>
+    </label>
+    <label>
+      <span class="description hidden"></span>
+    </label>
+  </div>
+</div>
+{{ end }}
