@@ -46,11 +46,39 @@ type TransactionJSONResponse struct {
 	Description *string `json:"description"`
 }
 
+func (t TransactionJSONResponse) GetState() string {
+	if t.State == nil {
+		return ""
+	}
+	return *t.State
+}
+
+func (t TransactionJSONResponse) GetPostcode() int {
+	if t.Postcode == nil {
+		return 0
+	}
+	return *t.Postcode
+}
+
+func (t TransactionJSONResponse) GetOrganisation() string {
+	if t.Organisation == nil {
+		return ""
+	}
+	return *t.Organisation
+}
+
 func (t TransactionJSONResponse) GetAddress() string {
 	if t.Address == nil {
 		return ""
 	}
 	return *t.Address
+}
+
+func (t TransactionJSONResponse) GetDescription() string {
+	if t.Description == nil {
+		return ""
+	}
+	return *t.Description
 }
 
 type TransactionJSONRequest struct {
@@ -80,12 +108,18 @@ func NewTransactionJSONResponse(t Transaction) (TransactionJSONResponse, error) 
 	}
 
 	if t.organisation != nil && t.organisation.Address.String != "" {
+
 		address := t.organisation.Address.String
 		if t.postcode != nil && t.state != nil {
 			address = fmt.Sprintf("%s, %s, %s", address, t.postcode.Locality, t.state.Name)
 		}
 
 		r.Address = &address
+
+		if t.organisation.R != nil && t.organisation.R.BusinessCode != nil {
+			description := t.organisation.R.BusinessCode.Description.String
+			r.Description = &description
+		}
 	}
 
 	return r, nil

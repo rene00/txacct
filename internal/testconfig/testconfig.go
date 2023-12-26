@@ -10,4 +10,5 @@ type Test struct {
 	Address      string `yaml:"address"`
 	Organisation string `yaml:"organisation"`
 	Description  string `yaml:"description"`
+	State        string `yaml:"state"`
 }

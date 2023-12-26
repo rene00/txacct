@@ -20,21 +20,22 @@ tasks:
     desc: "run app with debug"
     cmds:
       -  dlv debug ./cmd/transactionsearch
-  db:init:
-    desc: "db init"
-    cmds:
-      - poetry run flask db init
   db:migrate:
     desc: "db migrate"
-    desp: [build]
+    deps: [build]
     env:
       TS_DO_MIGRATE: 1
     cmds:
       - ./transactionsearch
-  db:upgrade:
-    desc: "db upgrade"
+  db:create:
+    desc: "migrate create"
+    summary: |
+      Migrate create
+
+      Must pass in name of migration files to task:
+        task migrate:create footable
     cmds:
-      - poetry run flask db upgrade
+      - migrate -source file://db/migrations -database $TS_POSTGRES_URI create -dir=./db/migrations -format=unix -ext sql {{.CLI_ARGS}}
   import:postcode:
     desc: "import postcode data"
     cmds:
@@ -128,15 +129,6 @@ tasks:
     deps: [transactionsearch:build]
     cmds:
       - ./transactionsearch
-  migrate:create:
-    desc: "migrate create"
-    summary: |
-      Migrate create
-
-      Must pass in name of migration files to task:
-        task migrate:create footable
-    cmds:
-      - migrate -source file://db/migrations -database $TS_POSTGRES_URI create -dir=./db/migrations -format=unix -ext sql {{.CLI_ARGS}}
   bin-data:
     desc: "run go-bindata to package up db migrations"
     summary: |
