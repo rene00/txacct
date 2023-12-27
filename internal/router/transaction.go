@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func transactionHandler(db *sql.DB) gin.HandlerFunc {
+func transactionHandler(db *sql.DB, ch chan WorkerRequest) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var transactionRequest transaction.TransactionJSONRequest
 		if err := ctx.ShouldBindJSON(&transactionRequest); err != nil {
@@ -18,23 +18,27 @@ func transactionHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
+		maxCap := cap(ch)
+		if len(ch) == maxCap {
+			ctx.String(429, "retry later")
+			return
+		}
+
+		responseCh := make(chan WorkerResponse, 1)
+		defer close(responseCh)
+
 		t := transaction.NewTransaction(transactionRequest.Memo, db)
+		req := WorkerRequest{Chan: responseCh, Transaction: t}
+		ch <- req
 
-		transactionHandlers := []transaction.TransactionHandler{
-			transaction.NewTransactionState(),
-			transaction.NewTransactionPostcode(),
-			transaction.NewTransactionOrganisation(),
+		resp := <-responseCh
+		if resp.Error != nil {
+			ctx.String(http.StatusInternalServerError, "failed transaction response")
+			log.Printf("failed transaction response: %v", resp.Error)
+			return
 		}
 
-		for _, handler := range transactionHandlers {
-			if err := handler.Handle(ctx, db, t); err != nil {
-				ctx.String(http.StatusInternalServerError, "failed handler")
-				log.Printf("failed handler: %v", err)
-				return
-			}
-		}
-
-		transactionJSONResponse, err := transaction.NewTransactionJSONResponse(*t)
+		transactionJSONResponse, err := transaction.NewTransactionJSONResponse(*resp.Transaction)
 		if err != nil {
 			ctx.String(http.StatusInternalServerError, "failed transaction response")
 			log.Printf("failed transaction response: %v", err)
