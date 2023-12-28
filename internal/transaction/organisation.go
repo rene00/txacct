@@ -2,13 +2,13 @@ package transaction
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"regexp"
 	"strings"
 	"transactionsearch/internal/tokenize"
 	"transactionsearch/models"
 
+	"github.com/datasapiens/cachier"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
@@ -18,7 +18,7 @@ func NewTransactionOrganisation() TransactionHandler {
 	return TransactionOrganisation{}
 }
 
-func (to TransactionOrganisation) Handle(ctx context.Context, db *sql.DB, transaction *Transaction) error {
+func (to TransactionOrganisation) Handle(ctx context.Context, store Store, transaction *Transaction) error {
 
 	if transaction.postcode == nil {
 		return nil
@@ -28,16 +28,34 @@ func (to TransactionOrganisation) Handle(ctx context.Context, db *sql.DB, transa
 
 	likeQueryContents = to.buildLikeQueryContents(*transaction)
 	for i := len(likeQueryContents) - 1; i >= 0; i-- {
-		v := likeQueryContents[i]
+		var organisations models.OrganisationSlice
 		var q []qm.QueryMod
+
+		v := likeQueryContents[i]
 		q = []qm.QueryMod{
 			qm.InnerJoin(fmt.Sprintf("postcode p on organisation.postcode_id = %d", transaction.postcode.ID)),
 			qm.Where("name ILIKE ?", v+"%"),
 			qm.Load("BusinessCode"),
 		}
-		organisations, err := models.Organisations(q...).All(ctx, db)
-		if err != nil {
+
+		cachedOrganisations, err := store.Cache.Get(v)
+		if err != nil && err != cachier.ErrNotFound {
 			return err
+		}
+
+		if cachedOrganisations != nil {
+			o := *cachedOrganisations
+			organisations = o[0]
+		} else {
+			organisations, err = models.Organisations(q...).All(ctx, store.DB)
+			if err != nil {
+				return err
+			}
+			data := []models.OrganisationSlice{organisations}
+			err = store.Cache.Set(v, &data)
+			if err != nil {
+				return err
+			}
 		}
 
 		for _, organisation := range organisations {

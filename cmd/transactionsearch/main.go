@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,7 +15,9 @@ import (
 	"transactionsearch/db/migrations"
 	"transactionsearch/internal/router"
 	"transactionsearch/internal/transaction"
+	"transactionsearch/models"
 
+	"github.com/datasapiens/cachier"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"golang.org/x/sync/errgroup"
@@ -49,6 +52,16 @@ func main() {
 	}
 
 	workerQueueLength, err := strconv.Atoi(_workerQueueLength)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_cacheLRUSize, ok := os.LookupEnv("TS_CACHE_LRU_SIZE")
+	if !ok {
+		_cacheLRUSize = "300"
+	}
+
+	cacheLRUSize, err := strconv.Atoi(_cacheLRUSize)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -120,6 +133,26 @@ func main() {
 	})
 
 	g.Go(func() error {
+
+		lc, err := cachier.NewLRUCache(cacheLRUSize,
+			func(value interface{}) ([]byte, error) {
+				return json.Marshal(value)
+			},
+			func(b []byte, value *interface{}) error {
+				var res []models.OrganisationSlice
+				return json.Unmarshal(b, &res)
+				*value = res
+				return nil
+			},
+			nil)
+		if err != nil {
+			return err
+		}
+
+		cache := cachier.MakeCache[[]models.OrganisationSlice](lc)
+
+		store := transaction.Store{db, cache}
+
 		for req := range workerCh {
 			resp := router.WorkerResponse{Error: nil}
 
@@ -130,7 +163,7 @@ func main() {
 			}
 
 			for _, handler := range transactionHandlers {
-				if err := handler.Handle(ctx, db, req.Transaction); err != nil {
+				if err := handler.Handle(ctx, store, req.Transaction); err != nil {
 					resp.Error = err
 					break
 				}

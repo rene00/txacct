@@ -2,7 +2,6 @@ package transaction
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"strings"
 	"transactionsearch/models"
@@ -16,7 +15,7 @@ func NewTransactionPostcode() TransactionHandler {
 	return TransactionPostcode{}
 }
 
-func (tp TransactionPostcode) Handle(ctx context.Context, db *sql.DB, transaction *Transaction) error {
+func (tp TransactionPostcode) Handle(ctx context.Context, store Store, transaction *Transaction) error {
 	for _, token := range transaction.tokenize.TokensReversed() {
 		if strings.ToLower(token.ValueString()) == "aus" {
 			continue
@@ -27,7 +26,7 @@ func (tp TransactionPostcode) Handle(ctx context.Context, db *sql.DB, transactio
 			qm.InnerJoin("state s on postcode.state_id = s.id"),
 		}
 
-		s, err := stripStateFromString(ctx, db, token.ValueString())
+		s, err := stripStateFromString(ctx, store.DB, token.ValueString())
 		if err != nil {
 			return err
 		}
@@ -35,7 +34,7 @@ func (tp TransactionPostcode) Handle(ctx context.Context, db *sql.DB, transactio
 		s = stripCountryFromString(s)
 
 		if token.Previous() != nil {
-			previousTokenString, err := stripStateFromString(ctx, db, token.Previous().ValueString())
+			previousTokenString, err := stripStateFromString(ctx, store.DB, token.Previous().ValueString())
 			if err != nil {
 				return err
 			}
@@ -44,14 +43,14 @@ func (tp TransactionPostcode) Handle(ctx context.Context, db *sql.DB, transactio
 			q = append(q, qm.Or("locality ilike ?", query+"%"))
 		}
 
-		postcodes, err := models.Postcodes(q...).All(ctx, db)
+		postcodes, err := models.Postcodes(q...).All(ctx, store.DB)
 		if err != nil {
 			return err
 		}
 
 		for _, stateName := range allStatesPreferenced() {
 			for _, postcode := range postcodes {
-				state, err := postcode.State().One(ctx, db)
+				state, err := postcode.State().One(ctx, store.DB)
 				if err != nil {
 					return err
 				}
