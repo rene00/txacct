@@ -28,37 +28,31 @@ func (to TransactionOrganisation) Handle(ctx context.Context, store Store, trans
 
 	likeQueryContents = to.buildLikeQueryContents(*transaction)
 	for i := len(likeQueryContents) - 1; i >= 0; i-- {
-		v := likeQueryContents[i]
+		var organisations models.OrganisationSlice
 		var q []qm.QueryMod
+
+		v := likeQueryContents[i]
 		q = []qm.QueryMod{
 			qm.InnerJoin(fmt.Sprintf("postcode p on organisation.postcode_id = %d", transaction.postcode.ID)),
 			qm.Where("name ILIKE ?", v+"%"),
 			qm.Load("BusinessCode"),
 		}
 
-		key := v
-		output, err := store.Cache.Get(key)
+		cachedOrganisations, err := store.Cache.Get(v)
 		if err != nil && err != cachier.ErrNotFound {
 			return err
 		}
 
-		var organisations models.OrganisationSlice
-
-		cached := false
-		if output != nil {
-			o := *output
+		if cachedOrganisations != nil {
+			o := *cachedOrganisations
 			organisations = o[0]
-			cached = false
 		} else {
 			organisations, err = models.Organisations(q...).All(ctx, store.DB)
 			if err != nil {
 				return err
 			}
-		}
-
-		if !cached {
 			data := []models.OrganisationSlice{organisations}
-			err = store.Cache.Set(key, &data)
+			err = store.Cache.Set(v, &data)
 			if err != nil {
 				return err
 			}

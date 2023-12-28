@@ -150,7 +150,6 @@ func main() {
 		}
 
 		cache := cachier.MakeCache[[]models.OrganisationSlice](lc)
-		fmt.Println(cache)
 
 		store := transaction.Store{db, cache}
 

@@ -13,7 +13,8 @@ import (
 )
 
 type Store struct {
-	DB    *sql.DB
+	DB *sql.DB
+	// Cache is an LRU cache for Organisations.
 	Cache *cachier.Cache[[]models.OrganisationSlice]
 }
 
