@@ -2,7 +2,6 @@ package transaction
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"regexp"
 	"slices"
@@ -19,8 +18,8 @@ func NewTransactionState() TransactionHandler {
 	return TransactionState{}
 }
 
-func (ts TransactionState) Handle(ctx context.Context, db *sql.DB, transaction *Transaction) error {
-	states, err := models.States().All(ctx, db)
+func (ts TransactionState) Handle(ctx context.Context, store Store, transaction *Transaction) error {
+	states, err := models.States().All(ctx, store.DB)
 	if err != nil {
 		return err
 	}
@@ -62,14 +61,14 @@ func (ts TransactionState) Handle(ctx context.Context, db *sql.DB, transaction *
 			qm.Where("locality=?", locality),
 			qm.InnerJoin("state s on postcode.state_id = s.id"),
 		}
-		postcodes, err := models.Postcodes(q...).All(ctx, db)
+		postcodes, err := models.Postcodes(q...).All(ctx, store.DB)
 		if err != nil {
 			return nil
 		}
 
 		postcodeStates := map[*models.State][]*models.Postcode{}
 		for _, postcode := range postcodes {
-			state, err := postcode.State().One(ctx, db)
+			state, err := postcode.State().One(ctx, store.DB)
 			if err != nil {
 				return err
 			}
@@ -94,13 +93,13 @@ func (ts TransactionState) Handle(ctx context.Context, db *sql.DB, transaction *
 				qm.Where("locality ilike ?", fmt.Sprintf("%s", strings.Join(s, " "))+"%"),
 				qm.InnerJoin("state s on postcode.state_id = s.id"),
 			}
-			postcodes, err := models.Postcodes(q...).All(ctx, db)
+			postcodes, err := models.Postcodes(q...).All(ctx, store.DB)
 			if err != nil {
 				return err
 			}
 
 			for _, postcode := range postcodes {
-				state, err := postcode.State().One(ctx, db)
+				state, err := postcode.State().One(ctx, store.DB)
 				if err != nil {
 					return err
 

@@ -10,6 +10,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type TransactionCache struct {
+	Memo string
+}
+
 func transactionHandler(db *sql.DB, ch chan WorkerRequest) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var transactionRequest transaction.TransactionJSONRequest

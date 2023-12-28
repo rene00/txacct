@@ -2,13 +2,13 @@ package transaction
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"regexp"
 	"strings"
 	"transactionsearch/internal/tokenize"
 	"transactionsearch/models"
 
+	"github.com/datasapiens/cachier"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
@@ -18,7 +18,7 @@ func NewTransactionOrganisation() TransactionHandler {
 	return TransactionOrganisation{}
 }
 
-func (to TransactionOrganisation) Handle(ctx context.Context, db *sql.DB, transaction *Transaction) error {
+func (to TransactionOrganisation) Handle(ctx context.Context, store Store, transaction *Transaction) error {
 
 	if transaction.postcode == nil {
 		return nil
@@ -35,9 +35,33 @@ func (to TransactionOrganisation) Handle(ctx context.Context, db *sql.DB, transa
 			qm.Where("name ILIKE ?", v+"%"),
 			qm.Load("BusinessCode"),
 		}
-		organisations, err := models.Organisations(q...).All(ctx, db)
-		if err != nil {
+
+		key := v
+		output, err := store.Cache.Get(key)
+		if err != nil && err != cachier.ErrNotFound {
 			return err
+		}
+
+		var organisations models.OrganisationSlice
+
+		cached := false
+		if output != nil {
+			o := *output
+			organisations = o[0]
+			cached = false
+		} else {
+			organisations, err = models.Organisations(q...).All(ctx, store.DB)
+			if err != nil {
+				return err
+			}
+		}
+
+		if !cached {
+			data := []models.OrganisationSlice{organisations}
+			err = store.Cache.Set(key, &data)
+			if err != nil {
+				return err
+			}
 		}
 
 		for _, organisation := range organisations {

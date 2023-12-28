@@ -8,10 +8,17 @@ import (
 	"strconv"
 	"transactionsearch/internal/tokenize"
 	"transactionsearch/models"
+
+	"github.com/datasapiens/cachier"
 )
 
+type Store struct {
+	DB    *sql.DB
+	Cache *cachier.Cache[[]models.OrganisationSlice]
+}
+
 type TransactionHandler interface {
-	Handle(ctx context.Context, db *sql.DB, transaction *Transaction) error
+	Handle(ctx context.Context, store Store, transaction *Transaction) error
 }
 
 type Transaction struct {
