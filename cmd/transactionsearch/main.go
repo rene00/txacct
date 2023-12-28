@@ -56,6 +56,16 @@ func main() {
 		log.Fatal(err)
 	}
 
+	_cacheLRUSize, ok := os.LookupEnv("TS_CACHE_LRU_SIZE")
+	if !ok {
+		_cacheLRUSize = "300"
+	}
+
+	cacheLRUSize, err := strconv.Atoi(_cacheLRUSize)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	db, err := sql.Open("pgx", postgresURI)
 	if err != nil {
 		log.Fatal(err)
@@ -124,7 +134,7 @@ func main() {
 
 	g.Go(func() error {
 
-		lc, err := cachier.NewLRUCache(300,
+		lc, err := cachier.NewLRUCache(cacheLRUSize,
 			func(value interface{}) ([]byte, error) {
 				return json.Marshal(value)
 			},
