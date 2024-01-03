@@ -119,7 +119,11 @@ func (to TransactionOrganisation) buildLikeQueryContents(transaction Transaction
 			continue
 		}
 
-		s = append(s, fmt.Sprintf("%s %s", s[len(s)-1], token.ValueString()))
+		if len(s) == 0 {
+			s = append(s, token.ValueString())
+		} else {
+			s = append(s, fmt.Sprintf("%s %s", s[len(s)-1], token.ValueString()))
+		}
 	}
 	return s
 }
