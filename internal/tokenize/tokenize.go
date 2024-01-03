@@ -9,6 +9,7 @@ type Tokenize struct {
 	tokens []*Token
 }
 
+// Parse accepts a string which is parsed and tokenized into t.tokens.
 func (t *Tokenize) Parse(s string) {
 	t.raw = s
 	previousToken := &Token{}
