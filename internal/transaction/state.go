@@ -24,23 +24,24 @@ func (ts TransactionState) Handle(ctx context.Context, store Store, transaction 
 		return err
 	}
 
-	tokens := transaction.tokenize.TokensReversed()
-	for _, token := range tokens {
-		for _, state := range states {
-			shortState := state.Name[:2]
-			re := regexp.MustCompile(fmt.Sprintf(`(?i)(?P<prefix>\w+)?(?P<state>%s|%s)$`, state.Name, shortState))
-			match := re.FindStringSubmatch(token.ValueString())
-			if len(match) == 3 {
-				token.SetLocality(true)
-				transaction.state = state
-				return nil
-			}
+	// Get state from last token. If state exists within the memo and is not
+	// the last token, it is most likely part of the organisation name.
+	lastToken := transaction.tokenize.Last()
+	for _, state := range states {
+		shortState := state.Name[:2]
+		re := regexp.MustCompile(fmt.Sprintf(`(?i)(?P<prefix>\w+)?(?P<state>%s|%s)$`, state.Name, shortState))
+		match := re.FindStringSubmatch(lastToken.ValueString())
+		if len(match) == 3 {
+			lastToken.SetLocality(true)
+			transaction.state = state
+			return nil
 		}
 	}
 
 	// Lookup state using postcode. Get the last 2 tokens and lookup in
 	// postcode. If postcode found, use the state from the postcode.
 	combined := []*tokenize.Token{}
+	tokens := transaction.tokenize.TokensReversed()
 	for idx, token := range tokens {
 		if idx == 2 {
 			break

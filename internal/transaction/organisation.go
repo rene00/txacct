@@ -3,12 +3,12 @@ package transaction
 import (
 	"context"
 	"fmt"
-	"regexp"
+	"slices"
+	"sort"
 	"strings"
 	"transactionsearch/internal/tokenize"
 	"transactionsearch/models"
 
-	"github.com/datasapiens/cachier"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
@@ -20,53 +20,63 @@ func NewTransactionOrganisation() TransactionHandler {
 
 func (to TransactionOrganisation) Handle(ctx context.Context, store Store, transaction *Transaction) error {
 
-	if transaction.postcode == nil {
-		return nil
+	name := to.buildNameQueryContents(*transaction)
+
+	type result struct {
+		Similarity          float64 `boil:"similarity"`
+		models.Organisation `boil:",bind"`
+		models.Postcode     `boil:",bind"`
+		models.BusinessCode `boil:",bind"`
 	}
 
-	var likeQueryContents []string
+	results := []result{}
 
-	likeQueryContents = to.buildLikeQueryContents(*transaction)
-	for i := len(likeQueryContents) - 1; i >= 0; i-- {
-		var organisations models.OrganisationSlice
-		var q []qm.QueryMod
+	err := models.NewQuery(
+		qm.Select("organisation.id", "organisation.name", "organisation.address", "organisation.postcode_id", fmt.Sprintf("similarity(name, '%s') as similarity", name), "postcode.id", "postcode.locality", "business_code.id"),
+		qm.From("organisation"),
+		qm.Where("organisation.name % ?", name),
+		qm.OrderBy("similarity DESC, organisation.name"),
+		qm.InnerJoin("postcode on postcode.id = organisation.postcode_id"),
+		qm.InnerJoin("business_code on business_code.id = organisation.business_code_id"),
+	).Bind(ctx, store.DB, &results)
+	if err != nil {
+		return err
+	}
 
-		v := likeQueryContents[i]
-		q = []qm.QueryMod{
-			qm.InnerJoin(fmt.Sprintf("postcode p on organisation.postcode_id = %d", transaction.postcode.ID)),
-			qm.Where("name ILIKE ?", v+"%"),
-			qm.Load("BusinessCode"),
+	resultsOrderBySimilarity := map[float64][]result{}
+
+	for _, res := range results {
+		foundResult, ok := resultsOrderBySimilarity[res.Similarity]
+		if !ok {
+			resultsOrderBySimilarity[res.Similarity] = []result{res}
+			continue
 		}
+		foundResult = append(foundResult, res)
+		resultsOrderBySimilarity[res.Similarity] = foundResult
+	}
 
-		cachedOrganisations, err := store.Cache.Get(v)
-		if err != nil && err != cachier.ErrNotFound {
-			return err
-		}
+	resultsOrderBySimilaritySortedKeys := make([]float64, 0, len(resultsOrderBySimilarity))
 
-		if cachedOrganisations != nil {
-			o := *cachedOrganisations
-			organisations = o[0]
-		} else {
-			organisations, err = models.Organisations(q...).All(ctx, store.DB)
-			if err != nil {
-				return err
-			}
-			data := []models.OrganisationSlice{organisations}
-			err = store.Cache.Set(v, &data)
-			if err != nil {
-				return err
-			}
-		}
+	for k := range resultsOrderBySimilarity {
+		resultsOrderBySimilaritySortedKeys = append(resultsOrderBySimilaritySortedKeys, k)
+	}
+	sort.Float64s(resultsOrderBySimilaritySortedKeys)
+	slices.Reverse(resultsOrderBySimilaritySortedKeys)
 
-		for _, organisation := range organisations {
-			for i := len(likeQueryContents) - 1; i >= 0; i-- {
-				q := likeQueryContents[i]
-
-				re, err := regexp.Compile("(?i)" + q)
-				if err != nil {
-					return err
-				}
-				if re.MatchString(organisation.Name) {
+	// Iterate through all organisations order by similarity desc and set the
+	// transaction organisation of the first organisation that matches the
+	// transacode postcode.
+	for _, similarity := range resultsOrderBySimilaritySortedKeys {
+		for _, result := range resultsOrderBySimilarity[similarity] {
+			for _, postcode := range transaction.postcodes {
+				if postcode.ID == result.Postcode.ID {
+					// Perform another select to get organisation with eager
+					// loading BusinessCode. The eager loading of BusinessCode
+					// can't be done with the previous query bind.
+					organisation, err := models.Organisations(qm.Load("BusinessCode"), qm.Where("id = ?", result.Organisation.ID)).One(ctx, store.DB)
+					if err != nil {
+						return err
+					}
 					transaction.organisation = organisation
 					return nil
 				}
@@ -105,25 +115,14 @@ func (to TransactionOrganisation) querySkipToken(token tokenize.Token) bool {
 	return false
 }
 
-// buildLikeQueryContents accepts a transaction and returns a slice of strings which
-// are the ILIKE queries that will be used when searching for an organisation.
-func (to TransactionOrganisation) buildLikeQueryContents(transaction Transaction) []string {
-	var s []string
+func (to TransactionOrganisation) buildNameQueryContents(transaction Transaction) string {
+	var sb strings.Builder
 	for _, token := range transaction.tokenize.Tokens() {
 		if to.querySkipToken(*token) {
 			continue
 		}
-
-		if token.Previous() == nil {
-			s = append(s, token.ValueString())
-			continue
-		}
-
-		if len(s) == 0 {
-			s = append(s, token.ValueString())
-		} else {
-			s = append(s, fmt.Sprintf("%s %s", s[len(s)-1], token.ValueString()))
-		}
+		sb.WriteString(token.ValueString() + " ")
 	}
+	s := strings.TrimSpace(sb.String())
 	return s
 }

@@ -28,6 +28,7 @@ type Transaction struct {
 	tokenize     tokenize.Tokenize
 	state        *models.State
 	postcode     *models.Postcode
+	postcodes    []*models.Postcode
 	organisation *models.Organisation
 }
 

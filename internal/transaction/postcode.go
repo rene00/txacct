@@ -16,6 +16,7 @@ func NewTransactionPostcode() TransactionHandler {
 }
 
 func (tp TransactionPostcode) Handle(ctx context.Context, store Store, transaction *Transaction) error {
+	var postcodes []*models.Postcode
 	for _, token := range transaction.tokenize.TokensReversed() {
 		if strings.ToLower(token.ValueString()) == "aus" {
 			continue
@@ -39,17 +40,25 @@ func (tp TransactionPostcode) Handle(ctx context.Context, store Store, transacti
 				return err
 			}
 			previousTokenString = stripCountryFromString(previousTokenString)
-			query := fmt.Sprintf("%s %s", previousTokenString, s)
+			query := fmt.Sprintf("%s", previousTokenString)
+			if len(s) != 0 {
+				query = fmt.Sprintf("%s %s", previousTokenString, s)
+			}
 			q = append(q, qm.Or("locality ilike ?", query+"%"))
 		}
 
-		postcodes, err := models.Postcodes(q...).All(ctx, store.DB)
+		postcodeSlice, err := models.Postcodes(q...).All(ctx, store.DB)
 		if err != nil {
 			return err
 		}
 
+		for _, postcode := range postcodeSlice {
+			postcodes = append(postcodes, postcode)
+		}
+		transaction.postcodes = postcodes
+
 		for _, stateName := range allStatesPreferenced() {
-			for _, postcode := range postcodes {
+			for _, postcode := range postcodeSlice {
 				state, err := postcode.State().One(ctx, store.DB)
 				if err != nil {
 					return err
