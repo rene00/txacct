@@ -64,6 +64,7 @@ target/
 files/
 
 # txacct
-transactionsearch.toml
-transactionsearch
-transactionsearchtest
+/transactionsearch.toml
+/transactionsearch
+/transactionsearchtest
+/transactionsearchimportpostcodes

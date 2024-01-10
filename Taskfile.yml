@@ -40,6 +40,11 @@ tasks:
     desc: "import postcode data"
     cmds:
       - poetry run flask postcode import
+  import:postcode:new:
+    desc: "import postcode data (new)"
+    cmds:
+      - go build -o ./transactionsearchimportpostcodes ./cmd/transactionsearchimportpostcodes
+      - ./transactionsearchimportpostcodes
   container:build:
     desc: "container build"
     cmds:
