@@ -9,6 +9,7 @@ import (
 	"transactionsearch/internal/tokenize"
 	"transactionsearch/models"
 
+	"github.com/datasapiens/cachier"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
@@ -19,6 +20,8 @@ func NewTransactionOrganisation() TransactionHandler {
 }
 
 func (to TransactionOrganisation) Handle(ctx context.Context, store Store, transaction *Transaction) error {
+
+	var err error
 
 	name := to.buildNameQueryContents(*transaction)
 
@@ -31,15 +34,24 @@ func (to TransactionOrganisation) Handle(ctx context.Context, store Store, trans
 
 	results := []result{}
 
-	err := models.NewQuery(
+	cacheOrganisation, err := store.Cache.Get(name)
+	if err != nil && err != cachier.ErrNotFound {
+		return err
+	}
+
+	if cacheOrganisation != nil {
+		transaction.organisation = cacheOrganisation
+		return nil
+	}
+
+	if err = models.NewQuery(
 		qm.Select("organisation.id", "organisation.name", "organisation.address", "organisation.postcode_id", fmt.Sprintf("similarity(name, '%s') as similarity", name), "postcode.id", "postcode.locality", "business_code.id"),
 		qm.From("organisation"),
 		qm.Where("organisation.name % ?", name),
 		qm.OrderBy("similarity DESC, organisation.name"),
 		qm.InnerJoin("postcode on postcode.id = organisation.postcode_id"),
 		qm.InnerJoin("business_code on business_code.id = organisation.business_code_id"),
-	).Bind(ctx, store.DB, &results)
-	if err != nil {
+	).Bind(ctx, store.DB, &results); err != nil {
 		return err
 	}
 
@@ -78,6 +90,11 @@ func (to TransactionOrganisation) Handle(ctx context.Context, store Store, trans
 						return err
 					}
 					transaction.organisation = organisation
+
+					if err = store.Cache.Set(name, organisation); err != nil {
+						return err
+					}
+
 					return nil
 				}
 			}

@@ -139,7 +139,7 @@ func main() {
 				return json.Marshal(value)
 			},
 			func(b []byte, value *interface{}) error {
-				var res []models.OrganisationSlice
+				var res models.Organisation
 				return json.Unmarshal(b, &res)
 				*value = res
 				return nil
@@ -149,7 +149,7 @@ func main() {
 			return err
 		}
 
-		cache := cachier.MakeCache[[]models.OrganisationSlice](lc)
+		cache := cachier.MakeCache[models.Organisation](lc)
 
 		store := transaction.Store{db, cache}
 
