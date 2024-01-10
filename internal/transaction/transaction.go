@@ -14,8 +14,8 @@ import (
 
 type Store struct {
 	DB *sql.DB
-	// Cache is an LRU cache for Organisations.
-	Cache *cachier.Cache[[]models.OrganisationSlice]
+	// Cache is an LRU cache for Organisation.
+	Cache *cachier.Cache[models.Organisation]
 }
 
 type TransactionHandler interface {
