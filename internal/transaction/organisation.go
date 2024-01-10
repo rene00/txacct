@@ -21,10 +21,6 @@ func NewTransactionOrganisation() TransactionHandler {
 
 func (to TransactionOrganisation) Handle(ctx context.Context, store Store, transaction *Transaction) error {
 
-	var err error
-
-	name := to.buildNameQueryContents(*transaction)
-
 	type result struct {
 		Similarity          float64 `boil:"similarity"`
 		models.Organisation `boil:",bind"`
@@ -34,25 +30,33 @@ func (to TransactionOrganisation) Handle(ctx context.Context, store Store, trans
 
 	results := []result{}
 
-	cacheOrganisation, err := store.Cache.Get(name)
-	if err != nil && err != cachier.ErrNotFound {
-		return err
-	}
+	foundName := ""
 
-	if cacheOrganisation != nil {
-		transaction.organisation = cacheOrganisation
-		return nil
-	}
+	names := to.buildNameQueryContents(*transaction)
+	for _, name := range names {
+		cacheOrganisation, err := store.Cache.Get(name)
+		if err != nil && err != cachier.ErrNotFound {
+			return err
+		}
 
-	if err = models.NewQuery(
-		qm.Select("organisation.id", "organisation.name", "organisation.address", "organisation.postcode_id", fmt.Sprintf("similarity(name, '%s') as similarity", name), "postcode.id", "postcode.locality", "business_code.id"),
-		qm.From("organisation"),
-		qm.Where("organisation.name % ?", name),
-		qm.OrderBy("similarity DESC, organisation.name"),
-		qm.InnerJoin("postcode on postcode.id = organisation.postcode_id"),
-		qm.InnerJoin("business_code on business_code.id = organisation.business_code_id"),
-	).Bind(ctx, store.DB, &results); err != nil {
-		return err
+		if cacheOrganisation != nil {
+			transaction.organisation = cacheOrganisation
+			return nil
+		}
+		if err = models.NewQuery(
+			qm.Select("organisation.id", "organisation.name", "organisation.address", "organisation.postcode_id", fmt.Sprintf("similarity(name, '%s') as similarity", name), "postcode.id", "postcode.locality", "business_code.id"),
+			qm.From("organisation"),
+			qm.Where("organisation.name % ?", name),
+			qm.OrderBy("similarity DESC, organisation.name"),
+			qm.InnerJoin("postcode on postcode.id = organisation.postcode_id"),
+			qm.InnerJoin("business_code on business_code.id = organisation.business_code_id"),
+		).Bind(ctx, store.DB, &results); err != nil {
+			return err
+		}
+		if len(results) >= 1 {
+			foundName = name
+			break
+		}
 	}
 
 	resultsOrderBySimilarity := map[float64][]result{}
@@ -85,13 +89,13 @@ func (to TransactionOrganisation) Handle(ctx context.Context, store Store, trans
 					// Perform another select to get organisation with eager
 					// loading BusinessCode. The eager loading of BusinessCode
 					// can't be done with the previous query bind.
-					organisation, err := models.Organisations(qm.Load("BusinessCode"), qm.Where("id = ?", result.Organisation.ID)).One(ctx, store.DB)
+					organisation, err := models.Organisations(qm.Load("BusinessCode"), qm.Load("Postcode"), qm.Where("id = ?", result.Organisation.ID)).One(ctx, store.DB)
 					if err != nil {
 						return err
 					}
 					transaction.organisation = organisation
 
-					if err = store.Cache.Set(name, organisation); err != nil {
+					if err = store.Cache.Set(foundName, organisation); err != nil {
 						return err
 					}
 
@@ -132,14 +136,26 @@ func (to TransactionOrganisation) querySkipToken(token tokenize.Token) bool {
 	return false
 }
 
-func (to TransactionOrganisation) buildNameQueryContents(transaction Transaction) string {
-	var sb strings.Builder
+// buildNameQueryContents accepts a transaction and returns a slice of strings
+// which contain Organisation.name queries for the transaction.
+func (to TransactionOrganisation) buildNameQueryContents(transaction Transaction) []string {
+	var s []string
 	for _, token := range transaction.tokenize.Tokens() {
 		if to.querySkipToken(*token) {
 			continue
 		}
-		sb.WriteString(token.ValueString() + " ")
+
+		if token.Previous() == nil {
+			s = append(s, token.ValueString())
+			continue
+		}
+
+		if len(s) == 0 {
+			s = append(s, token.ValueString())
+		} else {
+			s = append(s, fmt.Sprintf("%s %s", s[len(s)-1], token.ValueString()))
+		}
 	}
-	s := strings.TrimSpace(sb.String())
+	slices.Reverse(s)
 	return s
 }

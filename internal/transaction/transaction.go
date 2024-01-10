@@ -117,7 +117,6 @@ func NewTransactionJSONResponse(t Transaction) (TransactionJSONResponse, error) 
 	}
 
 	if t.organisation != nil && t.organisation.Address.String != "" {
-
 		address := t.organisation.Address.String
 		if t.postcode != nil && t.state != nil {
 			address = fmt.Sprintf("%s, %s, %s", address, t.postcode.Locality, t.state.Name)
@@ -128,6 +127,14 @@ func NewTransactionJSONResponse(t Transaction) (TransactionJSONResponse, error) 
 		if t.organisation.R != nil && t.organisation.R.BusinessCode != nil {
 			description := t.organisation.R.BusinessCode.Description.String
 			r.Description = &description
+		}
+
+		if t.organisation.R != nil && t.organisation.R.Postcode != nil {
+			postcode, err := strconv.Atoi(t.organisation.R.Postcode.Postcode)
+			if err != nil {
+				return r, err
+			}
+			r.Postcode = &postcode
 		}
 	}
 
