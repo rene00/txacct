@@ -191,7 +191,7 @@ class Importer:
             6:"ADDRESS",
             7:"LOCATION",
             8:"POSTCODE",
-            #9:"STATE",
+            9:"STATE",
             #10:"REGION",
             #11:"PHONE",
             #12:"MOBILE",
@@ -265,10 +265,29 @@ class Importer:
                         postcode["POSTCODE"] = cell.value
                     case "LOCATION":
                         postcode["LOCATION"] = cell.value
+                    case "STATE":
+                        postcode["STATE"] = cell.value
 
             organisation.business_code=self.__business_code(buscode)
             organisation.anzsic=self.__anzsic(anzsic)
             organisation.postcode=self.__postcode(postcode)
+
+            if organisation.postcode is None:
+                state = self.session.query(State).filter_by(name=postcode["STATE"]).one()
+                postcode: Postcode = Postcode(
+                    postcode=postcode["POSTCODE"],
+                    locality=postcode["LOCATION"],
+                    state=state,
+                )
+
+                self.session.add(postcode)
+                try:
+                    self.session.commit()
+                except IntegrityError:
+                    self.session.rollback()
+                organisation.postcode=postcode
+                print(f"created postcode: {postcode}")
+
             self.session.add(organisation)
             try:
                 self.session.commit()
