@@ -10,7 +10,6 @@ import (
 func NewRouter(db *sql.DB, ch chan WorkerRequest) *gin.Engine {
 	r := gin.Default()
 	r.Static("/static", "./static")
-	r.GET("/about", aboutHandler())
 	r.GET("/", homeHandler())
 	r.POST("/transactions", transactionHandler(db, ch))
 	return r

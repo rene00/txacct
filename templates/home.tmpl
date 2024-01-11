@@ -1,6 +1,21 @@
 {{ define "content" }}
 <h1>Transaction Search</h1>
 
+<div>
+    Enter the memo strings of a bank transaction to return metadata such
+    as Organisation, address and description.
+</div>
+
+<div>
+    <p>Example search queries:
+    <ul>
+        <li><pre>SQ *BRUNETTI ORO MYER Melbourne VI</pre></li>
+        <li><pre>MUSEUMS BOARD OF VIC CARLTON</pre></li>
+        <li><pre>JUICY BAO MELBOURNE VIC</pre></li>
+        <li><pre>SUPPER INN CHINESE MELBOURNE VIC</pre></li>
+    </ul>
+</div>
+
 <div class="search">
   <form>
     <label>
@@ -26,4 +41,8 @@
     </label>
   </div>
 </div>
+
+
+</div>
+
 {{ end }}
