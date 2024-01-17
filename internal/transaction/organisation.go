@@ -9,7 +9,6 @@ import (
 	"transactionsearch/internal/tokenize"
 	"transactionsearch/models"
 
-	"github.com/datasapiens/cachier"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
@@ -19,52 +18,81 @@ func NewTransactionOrganisation() TransactionHandler {
 	return TransactionOrganisation{}
 }
 
+type Result struct {
+	Similarity                  float64 `boil:"similarity"`
+	models.OrganisationStateVic `boil:",bind"`
+	models.OrganisationStateNSW `boil:",bind"`
+	models.Organisation         `boil:",bind"`
+	models.Postcode             `boil:",bind"`
+	models.BusinessCode         `boil:",bind"`
+	models.State                `boil:",bind"`
+}
+
 func (to TransactionOrganisation) Handle(ctx context.Context, store Store, transaction *Transaction) error {
+	var err error
 
-	type result struct {
-		Similarity          float64 `boil:"similarity"`
-		models.Organisation `boil:",bind"`
-		models.Postcode     `boil:",bind"`
-		models.BusinessCode `boil:",bind"`
+	results := []Result{}
+
+	stateNames := []string{}
+	if transaction.state != nil {
+		stateNames = append(stateNames, strings.ToLower(transaction.state.Name))
+	} else {
+		stateNames = append(stateNames, []string{"vic", "nsw"}...)
 	}
-
-	results := []result{}
-
-	foundName := ""
 
 	names := to.buildNameQueryContents(*transaction)
 	for _, name := range names {
-		cacheOrganisation, err := store.Cache.Get(name)
-		if err != nil && err != cachier.ErrNotFound {
-			return err
+
+		if len(results) >= 1 {
+			break
 		}
 
-		if cacheOrganisation != nil {
-			transaction.organisation = cacheOrganisation
-			return nil
-		}
-		if err = models.NewQuery(
-			qm.Select("organisation.id", "organisation.name", "organisation.address", "organisation.postcode_id", fmt.Sprintf("similarity(name, '%s') as similarity", name), "postcode.id", "postcode.locality", "business_code.id"),
-			qm.From("organisation"),
-			qm.Where("organisation.name % ?", name),
-			qm.OrderBy("similarity DESC, organisation.name"),
-			qm.InnerJoin("postcode on postcode.id = organisation.postcode_id"),
-			qm.InnerJoin("business_code on business_code.id = organisation.business_code_id"),
-		).Bind(ctx, store.DB, &results); err != nil {
-			return err
-		}
-		if len(results) >= 1 {
-			foundName = name
-			break
+		for _, stateName := range stateNames {
+			stateNameTable := fmt.Sprintf("organisation_state_%s", stateName)
+			q := []qm.QueryMod{
+				qm.Select(
+					fmt.Sprintf("%s.id", stateNameTable),
+					fmt.Sprintf("%s.name", stateNameTable),
+					fmt.Sprintf("%s.address", stateNameTable),
+					fmt.Sprintf("similarity(%s.name, '%s') as similarity", stateNameTable, name),
+					"organisation.id",
+					"organisation.postcode_id",
+					"organisation.business_code_id",
+					"postcode.id",
+					"postcode.postcode",
+					"postcode.locality",
+					"postcode.state_id",
+					"business_code.id",
+					"business_code.code",
+					"business_code.description",
+					"state.id",
+					"state.name",
+				),
+				qm.From(stateNameTable),
+				qm.Where(stateNameTable+".name % ?", name),
+				qm.OrderBy(fmt.Sprintf("similarity DESC, %s.name", stateNameTable)),
+				qm.InnerJoin(fmt.Sprintf("organisation on organisation.id = %s.organisation_id", stateNameTable)),
+				qm.InnerJoin("business_code on business_code.id = organisation.business_code_id"),
+				qm.InnerJoin("postcode on postcode.id = organisation.postcode_id"),
+				qm.InnerJoin("state on state.id = postcode.state_id"),
+			}
+
+			if err = models.NewQuery(q...).Bind(ctx, store.DB, &results); err != nil {
+				return fmt.Errorf("failed to query organisation state %s table: %w", stateNameTable, err)
+			}
+
+			if len(results) >= 1 {
+				break
+			}
 		}
 	}
 
-	resultsOrderBySimilarity := map[float64][]result{}
+	resultsOrderBySimilarity := map[float64][]Result{}
 
 	for _, res := range results {
 		foundResult, ok := resultsOrderBySimilarity[res.Similarity]
 		if !ok {
-			resultsOrderBySimilarity[res.Similarity] = []result{res}
+			resultsOrderBySimilarity[res.Similarity] = []Result{res}
 			continue
 		}
 		foundResult = append(foundResult, res)
@@ -85,18 +113,31 @@ func (to TransactionOrganisation) Handle(ctx context.Context, store Store, trans
 	for _, similarity := range resultsOrderBySimilaritySortedKeys {
 		for _, result := range resultsOrderBySimilarity[similarity] {
 			for _, postcode := range transaction.postcodes {
-				if postcode.ID == result.Postcode.ID {
+				if postcode.Postcode == result.Postcode.Postcode {
 					// Perform another select to get organisation with eager
 					// loading BusinessCode. The eager loading of BusinessCode
 					// can't be done with the previous query bind.
-					organisation, err := models.Organisations(qm.Load("BusinessCode"), qm.Load("Postcode"), qm.Where("id = ?", result.Organisation.ID)).One(ctx, store.DB)
+					q := []qm.QueryMod{
+						qm.Load("BusinessCode"),
+						qm.Load("Postcode"),
+						qm.Load("Postcode.State"),
+						qm.Where("organisation.id = ?", result.Organisation.ID),
+						qm.InnerJoin("postcode on postcode.id = organisation.postcode_id"),
+						qm.InnerJoin("state on state.id = postcode.state_id"),
+					}
+
+					organisation, err := models.Organisations(q...).One(ctx, store.DB)
 					if err != nil {
-						return err
+						return fmt.Errorf("failed to query organisation: %w", err)
 					}
 					transaction.organisation = organisation
+					transaction.postcode = organisation.R.Postcode
+					transaction.state = organisation.R.Postcode.R.State
 
-					if err = store.Cache.Set(foundName, organisation); err != nil {
-						return err
+					if result.OrganisationStateVic != (models.OrganisationStateVic{}) {
+						transaction.organisationStateVic = &result.OrganisationStateVic
+					} else if result.OrganisationStateNSW != (models.OrganisationStateNSW{}) {
+						transaction.organisationStateNSW = &result.OrganisationStateNSW
 					}
 
 					return nil

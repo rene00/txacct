@@ -27,6 +27,14 @@ tasks:
       TS_DO_MIGRATE: 1
     cmds:
       - ./transactionsearch
+  db:migrate:up:
+    desc: "db migrate manual up"
+    cmds:
+      - migrate -source file://db/migrations -database $TS_POSTGRES_URI up 1
+  db:migrate:down:
+    desc: "db migrate manual down"
+    cmds:
+      - migrate -source file://db/migrations -database $TS_POSTGRES_URI down 1
   db:create:
     desc: "migrate create"
     summary: |
@@ -36,6 +44,49 @@ tasks:
         task migrate:create footable
     cmds:
       - migrate -source file://db/migrations -database $TS_POSTGRES_URI create -dir=./db/migrations -format=unix -ext sql {{.CLI_ARGS}}
+  import:organisations:
+    desc: "(new) import orgnisation data"
+    summary: |
+      Import organisation data for a single region
+
+      Pass [1-6] to this task to import the corresponding region organisation data.
+    silent: true
+    cmds:
+      - |
+        case "{{.CLI_ARGS}}" in
+          1)
+            export TS_ORGANISATIONS_FILE={{.TXACCT_ORGANISATION_IMPORTER_1_FILENAME}}
+            export TS_ORGANISATIONS_WORKSHEET={{.TXACCT_ORGANISATION_IMPORTER_1_WORKSHEET}}
+            export TS_ORGANISATIONS_STATE={{.TXACCT_ORGANISATION_IMPORTER_1_STATE}}
+          ;;
+          2)
+            export TS_ORGANISATIONS_FILE={{.TXACCT_ORGANISATION_IMPORTER_2_FILENAME}}
+            export TS_ORGANISATIONS_WORKSHEET={{.TXACCT_ORGANISATION_IMPORTER_2_WORKSHEET}}
+            export TS_ORGANISATIONS_STATE={{.TXACCT_ORGANISATION_IMPORTER_2_STATE}}
+          ;;
+          3)
+            filename={{.TXACCT_ORGANISATION_IMPORTER_3_FILENAME}}
+            worksheet={{.TXACCT_ORGANISATION_IMPORTER_3_WORKSHEET}}
+          ;;
+          4)
+            filename={{.TXACCT_ORGANISATION_IMPORTER_4_FILENAME}}
+            worksheet={{.TXACCT_ORGANISATION_IMPORTER_4_WORKSHEET}}
+          ;;
+          5)
+            filename={{.TXACCT_ORGANISATION_IMPORTER_5_FILENAME}}
+            worksheet={{.TXACCT_ORGANISATION_IMPORTER_5_WORKSHEET}}
+          ;;
+          6)
+            filename={{.TXACCT_ORGANISATION_IMPORTER_6_FILENAME}}
+            worksheet={{.TXACCT_ORGANISATION_IMPORTER_6_WORKSHEET}}
+          ;;
+          7)
+            filename={{.TXACCT_ORGANISATION_IMPORTER_7_FILENAME}}
+            worksheet={{.TXACCT_ORGANISATION_IMPORTER_7_WORKSHEET}}
+          ;;
+        esac
+        go build -o ./transactionsearchimportorganisations ./cmd/transactionsearchimportorganisations
+        ./transactionsearchimportorganisations
   import:postcode:
     desc: "import postcode data"
     cmds:

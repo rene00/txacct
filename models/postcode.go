@@ -885,7 +885,7 @@ func (postcodeL) LoadOrganisations(ctx context.Context, e boil.ContextExecutor, 
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.ID) {
+				if a == obj.ID {
 					continue Outer
 				}
 			}
@@ -943,7 +943,7 @@ func (postcodeL) LoadOrganisations(ctx context.Context, e boil.ContextExecutor, 
 
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
-			if queries.Equal(local.ID, foreign.PostcodeID) {
+			if local.ID == foreign.PostcodeID {
 				local.R.Organisations = append(local.R.Organisations, foreign)
 				if foreign.R == nil {
 					foreign.R = &organisationR{}
@@ -1172,7 +1172,7 @@ func (o *Postcode) AddOrganisations(ctx context.Context, exec boil.ContextExecut
 	var err error
 	for _, rel := range related {
 		if insert {
-			queries.Assign(&rel.PostcodeID, o.ID)
+			rel.PostcodeID = o.ID
 			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
@@ -1193,7 +1193,7 @@ func (o *Postcode) AddOrganisations(ctx context.Context, exec boil.ContextExecut
 				return errors.Wrap(err, "failed to update foreign table")
 			}
 
-			queries.Assign(&rel.PostcodeID, o.ID)
+			rel.PostcodeID = o.ID
 		}
 	}
 
@@ -1214,80 +1214,6 @@ func (o *Postcode) AddOrganisations(ctx context.Context, exec boil.ContextExecut
 			rel.R.Postcode = o
 		}
 	}
-	return nil
-}
-
-// SetOrganisations removes all previously related items of the
-// postcode replacing them completely with the passed
-// in related items, optionally inserting them as new records.
-// Sets o.R.Postcode's Organisations accordingly.
-// Replaces o.R.Organisations with related.
-// Sets related.R.Postcode's Organisations accordingly.
-func (o *Postcode) SetOrganisations(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Organisation) error {
-	query := "update \"organisation\" set \"postcode_id\" = null where \"postcode_id\" = $1"
-	values := []interface{}{o.ID}
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, query)
-		fmt.Fprintln(writer, values)
-	}
-	_, err := exec.ExecContext(ctx, query, values...)
-	if err != nil {
-		return errors.Wrap(err, "failed to remove relationships before set")
-	}
-
-	if o.R != nil {
-		for _, rel := range o.R.Organisations {
-			queries.SetScanner(&rel.PostcodeID, nil)
-			if rel.R == nil {
-				continue
-			}
-
-			rel.R.Postcode = nil
-		}
-		o.R.Organisations = nil
-	}
-
-	return o.AddOrganisations(ctx, exec, insert, related...)
-}
-
-// RemoveOrganisations relationships from objects passed in.
-// Removes related items from R.Organisations (uses pointer comparison, removal does not keep order)
-// Sets related.R.Postcode.
-func (o *Postcode) RemoveOrganisations(ctx context.Context, exec boil.ContextExecutor, related ...*Organisation) error {
-	if len(related) == 0 {
-		return nil
-	}
-
-	var err error
-	for _, rel := range related {
-		queries.SetScanner(&rel.PostcodeID, nil)
-		if rel.R != nil {
-			rel.R.Postcode = nil
-		}
-		if _, err = rel.Update(ctx, exec, boil.Whitelist("postcode_id")); err != nil {
-			return err
-		}
-	}
-	if o.R == nil {
-		return nil
-	}
-
-	for _, rel := range related {
-		for i, ri := range o.R.Organisations {
-			if rel != ri {
-				continue
-			}
-
-			ln := len(o.R.Organisations)
-			if ln > 1 && i < ln-1 {
-				o.R.Organisations[i] = o.R.Organisations[ln-1]
-			}
-			o.R.Organisations = o.R.Organisations[:ln-1]
-			break
-		}
-	}
-
 	return nil
 }
 
