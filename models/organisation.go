@@ -24,15 +24,11 @@ import (
 
 // Organisation is an object representing the database table.
 type Organisation struct {
-	ID                   int         `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Name                 string      `boil:"name" json:"name" toml:"name" yaml:"name"`
-	Abn                  null.String `boil:"abn" json:"abn,omitempty" toml:"abn" yaml:"abn,omitempty"`
-	Address              null.String `boil:"address" json:"address,omitempty" toml:"address" yaml:"address,omitempty"`
-	AnzsicID             null.Int    `boil:"anzsic_id" json:"anzsic_id,omitempty" toml:"anzsic_id" yaml:"anzsic_id,omitempty"`
-	BusinessCodeID       int         `boil:"business_code_id" json:"business_code_id" toml:"business_code_id" yaml:"business_code_id"`
-	PostcodeID           null.Int    `boil:"postcode_id" json:"postcode_id,omitempty" toml:"postcode_id" yaml:"postcode_id,omitempty"`
-	SourceID             null.Int    `boil:"source_id" json:"source_id,omitempty" toml:"source_id" yaml:"source_id,omitempty"`
-	OrganisationSourceID int         `boil:"organisation_source_id" json:"organisation_source_id" toml:"organisation_source_id" yaml:"organisation_source_id"`
+	ID                   int      `boil:"id" json:"id" toml:"id" yaml:"id"`
+	OrganisationSourceID int      `boil:"organisation_source_id" json:"organisation_source_id" toml:"organisation_source_id" yaml:"organisation_source_id"`
+	AnzsicID             null.Int `boil:"anzsic_id" json:"anzsic_id,omitempty" toml:"anzsic_id" yaml:"anzsic_id,omitempty"`
+	BusinessCodeID       int      `boil:"business_code_id" json:"business_code_id" toml:"business_code_id" yaml:"business_code_id"`
+	PostcodeID           int      `boil:"postcode_id" json:"postcode_id" toml:"postcode_id" yaml:"postcode_id"`
 
 	R *organisationR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L organisationL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -40,46 +36,30 @@ type Organisation struct {
 
 var OrganisationColumns = struct {
 	ID                   string
-	Name                 string
-	Abn                  string
-	Address              string
+	OrganisationSourceID string
 	AnzsicID             string
 	BusinessCodeID       string
 	PostcodeID           string
-	SourceID             string
-	OrganisationSourceID string
 }{
 	ID:                   "id",
-	Name:                 "name",
-	Abn:                  "abn",
-	Address:              "address",
+	OrganisationSourceID: "organisation_source_id",
 	AnzsicID:             "anzsic_id",
 	BusinessCodeID:       "business_code_id",
 	PostcodeID:           "postcode_id",
-	SourceID:             "source_id",
-	OrganisationSourceID: "organisation_source_id",
 }
 
 var OrganisationTableColumns = struct {
 	ID                   string
-	Name                 string
-	Abn                  string
-	Address              string
+	OrganisationSourceID string
 	AnzsicID             string
 	BusinessCodeID       string
 	PostcodeID           string
-	SourceID             string
-	OrganisationSourceID string
 }{
 	ID:                   "organisation.id",
-	Name:                 "organisation.name",
-	Abn:                  "organisation.abn",
-	Address:              "organisation.address",
+	OrganisationSourceID: "organisation.organisation_source_id",
 	AnzsicID:             "organisation.anzsic_id",
 	BusinessCodeID:       "organisation.business_code_id",
 	PostcodeID:           "organisation.postcode_id",
-	SourceID:             "organisation.source_id",
-	OrganisationSourceID: "organisation.organisation_source_id",
 }
 
 // Generated where
@@ -124,57 +104,45 @@ func (w whereHelpernull_Int) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNo
 
 var OrganisationWhere = struct {
 	ID                   whereHelperint
-	Name                 whereHelperstring
-	Abn                  whereHelpernull_String
-	Address              whereHelpernull_String
+	OrganisationSourceID whereHelperint
 	AnzsicID             whereHelpernull_Int
 	BusinessCodeID       whereHelperint
-	PostcodeID           whereHelpernull_Int
-	SourceID             whereHelpernull_Int
-	OrganisationSourceID whereHelperint
+	PostcodeID           whereHelperint
 }{
 	ID:                   whereHelperint{field: "\"organisation\".\"id\""},
-	Name:                 whereHelperstring{field: "\"organisation\".\"name\""},
-	Abn:                  whereHelpernull_String{field: "\"organisation\".\"abn\""},
-	Address:              whereHelpernull_String{field: "\"organisation\".\"address\""},
+	OrganisationSourceID: whereHelperint{field: "\"organisation\".\"organisation_source_id\""},
 	AnzsicID:             whereHelpernull_Int{field: "\"organisation\".\"anzsic_id\""},
 	BusinessCodeID:       whereHelperint{field: "\"organisation\".\"business_code_id\""},
-	PostcodeID:           whereHelpernull_Int{field: "\"organisation\".\"postcode_id\""},
-	SourceID:             whereHelpernull_Int{field: "\"organisation\".\"source_id\""},
-	OrganisationSourceID: whereHelperint{field: "\"organisation\".\"organisation_source_id\""},
+	PostcodeID:           whereHelperint{field: "\"organisation\".\"postcode_id\""},
 }
 
 // OrganisationRels is where relationship names are stored.
 var OrganisationRels = struct {
-	Anzsic             string
-	BusinessCode       string
-	OrganisationSource string
-	Postcode           string
+	BusinessCode         string
+	Postcode             string
+	OrganisationStateNSW string
+	OrganisationStateVic string
+	EmailOrganisations   string
 }{
-	Anzsic:             "Anzsic",
-	BusinessCode:       "BusinessCode",
-	OrganisationSource: "OrganisationSource",
-	Postcode:           "Postcode",
+	BusinessCode:         "BusinessCode",
+	Postcode:             "Postcode",
+	OrganisationStateNSW: "OrganisationStateNSW",
+	OrganisationStateVic: "OrganisationStateVic",
+	EmailOrganisations:   "EmailOrganisations",
 }
 
 // organisationR is where relationships are stored.
 type organisationR struct {
-	Anzsic             *Anzsic             `boil:"Anzsic" json:"Anzsic" toml:"Anzsic" yaml:"Anzsic"`
-	BusinessCode       *BusinessCode       `boil:"BusinessCode" json:"BusinessCode" toml:"BusinessCode" yaml:"BusinessCode"`
-	OrganisationSource *OrganisationSource `boil:"OrganisationSource" json:"OrganisationSource" toml:"OrganisationSource" yaml:"OrganisationSource"`
-	Postcode           *Postcode           `boil:"Postcode" json:"Postcode" toml:"Postcode" yaml:"Postcode"`
+	BusinessCode         *BusinessCode          `boil:"BusinessCode" json:"BusinessCode" toml:"BusinessCode" yaml:"BusinessCode"`
+	Postcode             *Postcode              `boil:"Postcode" json:"Postcode" toml:"Postcode" yaml:"Postcode"`
+	OrganisationStateNSW *OrganisationStateNSW  `boil:"OrganisationStateNSW" json:"OrganisationStateNSW" toml:"OrganisationStateNSW" yaml:"OrganisationStateNSW"`
+	OrganisationStateVic *OrganisationStateVic  `boil:"OrganisationStateVic" json:"OrganisationStateVic" toml:"OrganisationStateVic" yaml:"OrganisationStateVic"`
+	EmailOrganisations   EmailOrganisationSlice `boil:"EmailOrganisations" json:"EmailOrganisations" toml:"EmailOrganisations" yaml:"EmailOrganisations"`
 }
 
 // NewStruct creates a new relationship struct
 func (*organisationR) NewStruct() *organisationR {
 	return &organisationR{}
-}
-
-func (r *organisationR) GetAnzsic() *Anzsic {
-	if r == nil {
-		return nil
-	}
-	return r.Anzsic
 }
 
 func (r *organisationR) GetBusinessCode() *BusinessCode {
@@ -184,13 +152,6 @@ func (r *organisationR) GetBusinessCode() *BusinessCode {
 	return r.BusinessCode
 }
 
-func (r *organisationR) GetOrganisationSource() *OrganisationSource {
-	if r == nil {
-		return nil
-	}
-	return r.OrganisationSource
-}
-
 func (r *organisationR) GetPostcode() *Postcode {
 	if r == nil {
 		return nil
@@ -198,13 +159,34 @@ func (r *organisationR) GetPostcode() *Postcode {
 	return r.Postcode
 }
 
+func (r *organisationR) GetOrganisationStateNSW() *OrganisationStateNSW {
+	if r == nil {
+		return nil
+	}
+	return r.OrganisationStateNSW
+}
+
+func (r *organisationR) GetOrganisationStateVic() *OrganisationStateVic {
+	if r == nil {
+		return nil
+	}
+	return r.OrganisationStateVic
+}
+
+func (r *organisationR) GetEmailOrganisations() EmailOrganisationSlice {
+	if r == nil {
+		return nil
+	}
+	return r.EmailOrganisations
+}
+
 // organisationL is where Load methods for each relationship are stored.
 type organisationL struct{}
 
 var (
-	organisationAllColumns            = []string{"id", "name", "abn", "address", "anzsic_id", "business_code_id", "postcode_id", "source_id", "organisation_source_id"}
-	organisationColumnsWithoutDefault = []string{"name", "business_code_id", "organisation_source_id"}
-	organisationColumnsWithDefault    = []string{"id", "abn", "address", "anzsic_id", "postcode_id", "source_id"}
+	organisationAllColumns            = []string{"id", "organisation_source_id", "anzsic_id", "business_code_id", "postcode_id"}
+	organisationColumnsWithoutDefault = []string{"organisation_source_id", "business_code_id", "postcode_id"}
+	organisationColumnsWithDefault    = []string{"id", "anzsic_id"}
 	organisationPrimaryKeyColumns     = []string{"id"}
 	organisationGeneratedColumns      = []string{}
 )
@@ -487,17 +469,6 @@ func (q organisationQuery) Exists(ctx context.Context, exec boil.ContextExecutor
 	return count > 0, nil
 }
 
-// Anzsic pointed to by the foreign key.
-func (o *Organisation) Anzsic(mods ...qm.QueryMod) anzsicQuery {
-	queryMods := []qm.QueryMod{
-		qm.Where("\"id\" = ?", o.AnzsicID),
-	}
-
-	queryMods = append(queryMods, mods...)
-
-	return Anzsics(queryMods...)
-}
-
 // BusinessCode pointed to by the foreign key.
 func (o *Organisation) BusinessCode(mods ...qm.QueryMod) businessCodeQuery {
 	queryMods := []qm.QueryMod{
@@ -507,17 +478,6 @@ func (o *Organisation) BusinessCode(mods ...qm.QueryMod) businessCodeQuery {
 	queryMods = append(queryMods, mods...)
 
 	return BusinessCodes(queryMods...)
-}
-
-// OrganisationSource pointed to by the foreign key.
-func (o *Organisation) OrganisationSource(mods ...qm.QueryMod) organisationSourceQuery {
-	queryMods := []qm.QueryMod{
-		qm.Where("\"id\" = ?", o.OrganisationSourceID),
-	}
-
-	queryMods = append(queryMods, mods...)
-
-	return OrganisationSources(queryMods...)
 }
 
 // Postcode pointed to by the foreign key.
@@ -531,128 +491,40 @@ func (o *Organisation) Postcode(mods ...qm.QueryMod) postcodeQuery {
 	return Postcodes(queryMods...)
 }
 
-// LoadAnzsic allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for an N-1 relationship.
-func (organisationL) LoadAnzsic(ctx context.Context, e boil.ContextExecutor, singular bool, maybeOrganisation interface{}, mods queries.Applicator) error {
-	var slice []*Organisation
-	var object *Organisation
-
-	if singular {
-		var ok bool
-		object, ok = maybeOrganisation.(*Organisation)
-		if !ok {
-			object = new(Organisation)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybeOrganisation)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeOrganisation))
-			}
-		}
-	} else {
-		s, ok := maybeOrganisation.(*[]*Organisation)
-		if ok {
-			slice = *s
-		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybeOrganisation)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeOrganisation))
-			}
-		}
+// OrganisationStateNSW pointed to by the foreign key.
+func (o *Organisation) OrganisationStateNSW(mods ...qm.QueryMod) organisationStateNSWQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"organisation_id\" = ?", o.ID),
 	}
 
-	args := make([]interface{}, 0, 1)
-	if singular {
-		if object.R == nil {
-			object.R = &organisationR{}
-		}
-		if !queries.IsNil(object.AnzsicID) {
-			args = append(args, object.AnzsicID)
-		}
+	queryMods = append(queryMods, mods...)
 
-	} else {
-	Outer:
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &organisationR{}
-			}
+	return OrganisationStateNSWS(queryMods...)
+}
 
-			for _, a := range args {
-				if queries.Equal(a, obj.AnzsicID) {
-					continue Outer
-				}
-			}
-
-			if !queries.IsNil(obj.AnzsicID) {
-				args = append(args, obj.AnzsicID)
-			}
-
-		}
+// OrganisationStateVic pointed to by the foreign key.
+func (o *Organisation) OrganisationStateVic(mods ...qm.QueryMod) organisationStateVicQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"organisation_id\" = ?", o.ID),
 	}
 
-	if len(args) == 0 {
-		return nil
+	queryMods = append(queryMods, mods...)
+
+	return OrganisationStateVics(queryMods...)
+}
+
+// EmailOrganisations retrieves all the email_organisation's EmailOrganisations with an executor.
+func (o *Organisation) EmailOrganisations(mods ...qm.QueryMod) emailOrganisationQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
 	}
 
-	query := NewQuery(
-		qm.From(`anzsic`),
-		qm.WhereIn(`anzsic.id in ?`, args...),
+	queryMods = append(queryMods,
+		qm.Where("\"email_organisation\".\"organisation_id\"=?", o.ID),
 	)
-	if mods != nil {
-		mods.Apply(query)
-	}
 
-	results, err := query.QueryContext(ctx, e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load Anzsic")
-	}
-
-	var resultSlice []*Anzsic
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice Anzsic")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for anzsic")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for anzsic")
-	}
-
-	if len(anzsicAfterSelectHooks) != 0 {
-		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
-				return err
-			}
-		}
-	}
-
-	if len(resultSlice) == 0 {
-		return nil
-	}
-
-	if singular {
-		foreign := resultSlice[0]
-		object.R.Anzsic = foreign
-		if foreign.R == nil {
-			foreign.R = &anzsicR{}
-		}
-		foreign.R.Organisations = append(foreign.R.Organisations, object)
-		return nil
-	}
-
-	for _, local := range slice {
-		for _, foreign := range resultSlice {
-			if queries.Equal(local.AnzsicID, foreign.ID) {
-				local.R.Anzsic = foreign
-				if foreign.R == nil {
-					foreign.R = &anzsicR{}
-				}
-				foreign.R.Organisations = append(foreign.R.Organisations, local)
-				break
-			}
-		}
-	}
-
-	return nil
+	return EmailOrganisations(queryMods...)
 }
 
 // LoadBusinessCode allows an eager lookup of values, cached into the
@@ -775,126 +647,6 @@ func (organisationL) LoadBusinessCode(ctx context.Context, e boil.ContextExecuto
 	return nil
 }
 
-// LoadOrganisationSource allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for an N-1 relationship.
-func (organisationL) LoadOrganisationSource(ctx context.Context, e boil.ContextExecutor, singular bool, maybeOrganisation interface{}, mods queries.Applicator) error {
-	var slice []*Organisation
-	var object *Organisation
-
-	if singular {
-		var ok bool
-		object, ok = maybeOrganisation.(*Organisation)
-		if !ok {
-			object = new(Organisation)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybeOrganisation)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeOrganisation))
-			}
-		}
-	} else {
-		s, ok := maybeOrganisation.(*[]*Organisation)
-		if ok {
-			slice = *s
-		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybeOrganisation)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeOrganisation))
-			}
-		}
-	}
-
-	args := make([]interface{}, 0, 1)
-	if singular {
-		if object.R == nil {
-			object.R = &organisationR{}
-		}
-		args = append(args, object.OrganisationSourceID)
-
-	} else {
-	Outer:
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &organisationR{}
-			}
-
-			for _, a := range args {
-				if a == obj.OrganisationSourceID {
-					continue Outer
-				}
-			}
-
-			args = append(args, obj.OrganisationSourceID)
-
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	query := NewQuery(
-		qm.From(`organisation_source`),
-		qm.WhereIn(`organisation_source.id in ?`, args...),
-	)
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.QueryContext(ctx, e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load OrganisationSource")
-	}
-
-	var resultSlice []*OrganisationSource
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice OrganisationSource")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for organisation_source")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for organisation_source")
-	}
-
-	if len(organisationSourceAfterSelectHooks) != 0 {
-		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
-				return err
-			}
-		}
-	}
-
-	if len(resultSlice) == 0 {
-		return nil
-	}
-
-	if singular {
-		foreign := resultSlice[0]
-		object.R.OrganisationSource = foreign
-		if foreign.R == nil {
-			foreign.R = &organisationSourceR{}
-		}
-		foreign.R.Organisations = append(foreign.R.Organisations, object)
-		return nil
-	}
-
-	for _, local := range slice {
-		for _, foreign := range resultSlice {
-			if local.OrganisationSourceID == foreign.ID {
-				local.R.OrganisationSource = foreign
-				if foreign.R == nil {
-					foreign.R = &organisationSourceR{}
-				}
-				foreign.R.Organisations = append(foreign.R.Organisations, local)
-				break
-			}
-		}
-	}
-
-	return nil
-}
-
 // LoadPostcode allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
 func (organisationL) LoadPostcode(ctx context.Context, e boil.ContextExecutor, singular bool, maybeOrganisation interface{}, mods queries.Applicator) error {
@@ -928,9 +680,7 @@ func (organisationL) LoadPostcode(ctx context.Context, e boil.ContextExecutor, s
 		if object.R == nil {
 			object.R = &organisationR{}
 		}
-		if !queries.IsNil(object.PostcodeID) {
-			args = append(args, object.PostcodeID)
-		}
+		args = append(args, object.PostcodeID)
 
 	} else {
 	Outer:
@@ -940,14 +690,12 @@ func (organisationL) LoadPostcode(ctx context.Context, e boil.ContextExecutor, s
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.PostcodeID) {
+				if a == obj.PostcodeID {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.PostcodeID) {
-				args = append(args, obj.PostcodeID)
-			}
+			args = append(args, obj.PostcodeID)
 
 		}
 	}
@@ -1005,7 +753,7 @@ func (organisationL) LoadPostcode(ctx context.Context, e boil.ContextExecutor, s
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.PostcodeID, foreign.ID) {
+			if local.PostcodeID == foreign.ID {
 				local.R.Postcode = foreign
 				if foreign.R == nil {
 					foreign.R = &postcodeR{}
@@ -1019,83 +767,351 @@ func (organisationL) LoadPostcode(ctx context.Context, e boil.ContextExecutor, s
 	return nil
 }
 
-// SetAnzsic of the organisation to the related item.
-// Sets o.R.Anzsic to related.
-// Adds o to related.R.Organisations.
-func (o *Organisation) SetAnzsic(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Anzsic) error {
-	var err error
-	if insert {
-		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
-			return errors.Wrap(err, "failed to insert into foreign table")
+// LoadOrganisationStateNSW allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-1 relationship.
+func (organisationL) LoadOrganisationStateNSW(ctx context.Context, e boil.ContextExecutor, singular bool, maybeOrganisation interface{}, mods queries.Applicator) error {
+	var slice []*Organisation
+	var object *Organisation
+
+	if singular {
+		var ok bool
+		object, ok = maybeOrganisation.(*Organisation)
+		if !ok {
+			object = new(Organisation)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeOrganisation)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeOrganisation))
+			}
+		}
+	} else {
+		s, ok := maybeOrganisation.(*[]*Organisation)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeOrganisation)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeOrganisation))
+			}
 		}
 	}
 
-	updateQuery := fmt.Sprintf(
-		"UPDATE \"organisation\" SET %s WHERE %s",
-		strmangle.SetParamNames("\"", "\"", 1, []string{"anzsic_id"}),
-		strmangle.WhereClause("\"", "\"", 2, organisationPrimaryKeyColumns),
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &organisationR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &organisationR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`organisation_state_nsw`),
+		qm.WhereIn(`organisation_state_nsw.organisation_id in ?`, args...),
 	)
-	values := []interface{}{related.ID, o.ID}
-
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, updateQuery)
-		fmt.Fprintln(writer, values)
-	}
-	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-		return errors.Wrap(err, "failed to update local table")
+	if mods != nil {
+		mods.Apply(query)
 	}
 
-	queries.Assign(&o.AnzsicID, related.ID)
-	if o.R == nil {
-		o.R = &organisationR{
-			Anzsic: related,
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load OrganisationStateNSW")
+	}
+
+	var resultSlice []*OrganisationStateNSW
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice OrganisationStateNSW")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for organisation_state_nsw")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for organisation_state_nsw")
+	}
+
+	if len(organisationStateNSWAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
 		}
-	} else {
-		o.R.Anzsic = related
 	}
 
-	if related.R == nil {
-		related.R = &anzsicR{
-			Organisations: OrganisationSlice{o},
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.OrganisationStateNSW = foreign
+		if foreign.R == nil {
+			foreign.R = &organisationStateNSWR{}
 		}
-	} else {
-		related.R.Organisations = append(related.R.Organisations, o)
+		foreign.R.Organisation = object
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.ID == foreign.OrganisationID {
+				local.R.OrganisationStateNSW = foreign
+				if foreign.R == nil {
+					foreign.R = &organisationStateNSWR{}
+				}
+				foreign.R.Organisation = local
+				break
+			}
+		}
 	}
 
 	return nil
 }
 
-// RemoveAnzsic relationship.
-// Sets o.R.Anzsic to nil.
-// Removes o from all passed in related items' relationships struct.
-func (o *Organisation) RemoveAnzsic(ctx context.Context, exec boil.ContextExecutor, related *Anzsic) error {
-	var err error
+// LoadOrganisationStateVic allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-1 relationship.
+func (organisationL) LoadOrganisationStateVic(ctx context.Context, e boil.ContextExecutor, singular bool, maybeOrganisation interface{}, mods queries.Applicator) error {
+	var slice []*Organisation
+	var object *Organisation
 
-	queries.SetScanner(&o.AnzsicID, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("anzsic_id")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
+	if singular {
+		var ok bool
+		object, ok = maybeOrganisation.(*Organisation)
+		if !ok {
+			object = new(Organisation)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeOrganisation)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeOrganisation))
+			}
+		}
+	} else {
+		s, ok := maybeOrganisation.(*[]*Organisation)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeOrganisation)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeOrganisation))
+			}
+		}
 	}
 
-	if o.R != nil {
-		o.R.Anzsic = nil
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &organisationR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &organisationR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
 	}
-	if related == nil || related.R == nil {
+
+	if len(args) == 0 {
 		return nil
 	}
 
-	for i, ri := range related.R.Organisations {
-		if queries.Equal(o.AnzsicID, ri.AnzsicID) {
-			continue
-		}
-
-		ln := len(related.R.Organisations)
-		if ln > 1 && i < ln-1 {
-			related.R.Organisations[i] = related.R.Organisations[ln-1]
-		}
-		related.R.Organisations = related.R.Organisations[:ln-1]
-		break
+	query := NewQuery(
+		qm.From(`organisation_state_vic`),
+		qm.WhereIn(`organisation_state_vic.organisation_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
 	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load OrganisationStateVic")
+	}
+
+	var resultSlice []*OrganisationStateVic
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice OrganisationStateVic")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for organisation_state_vic")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for organisation_state_vic")
+	}
+
+	if len(organisationStateVicAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.OrganisationStateVic = foreign
+		if foreign.R == nil {
+			foreign.R = &organisationStateVicR{}
+		}
+		foreign.R.Organisation = object
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.ID == foreign.OrganisationID {
+				local.R.OrganisationStateVic = foreign
+				if foreign.R == nil {
+					foreign.R = &organisationStateVicR{}
+				}
+				foreign.R.Organisation = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadEmailOrganisations allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (organisationL) LoadEmailOrganisations(ctx context.Context, e boil.ContextExecutor, singular bool, maybeOrganisation interface{}, mods queries.Applicator) error {
+	var slice []*Organisation
+	var object *Organisation
+
+	if singular {
+		var ok bool
+		object, ok = maybeOrganisation.(*Organisation)
+		if !ok {
+			object = new(Organisation)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeOrganisation)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeOrganisation))
+			}
+		}
+	} else {
+		s, ok := maybeOrganisation.(*[]*Organisation)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeOrganisation)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeOrganisation))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &organisationR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &organisationR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`email_organisation`),
+		qm.WhereIn(`email_organisation.organisation_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load email_organisation")
+	}
+
+	var resultSlice []*EmailOrganisation
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice email_organisation")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on email_organisation")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for email_organisation")
+	}
+
+	if len(emailOrganisationAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.EmailOrganisations = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &emailOrganisationR{}
+			}
+			foreign.R.Organisation = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.OrganisationID {
+				local.R.EmailOrganisations = append(local.R.EmailOrganisations, foreign)
+				if foreign.R == nil {
+					foreign.R = &emailOrganisationR{}
+				}
+				foreign.R.Organisation = local
+				break
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -1146,53 +1162,6 @@ func (o *Organisation) SetBusinessCode(ctx context.Context, exec boil.ContextExe
 	return nil
 }
 
-// SetOrganisationSource of the organisation to the related item.
-// Sets o.R.OrganisationSource to related.
-// Adds o to related.R.Organisations.
-func (o *Organisation) SetOrganisationSource(ctx context.Context, exec boil.ContextExecutor, insert bool, related *OrganisationSource) error {
-	var err error
-	if insert {
-		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
-			return errors.Wrap(err, "failed to insert into foreign table")
-		}
-	}
-
-	updateQuery := fmt.Sprintf(
-		"UPDATE \"organisation\" SET %s WHERE %s",
-		strmangle.SetParamNames("\"", "\"", 1, []string{"organisation_source_id"}),
-		strmangle.WhereClause("\"", "\"", 2, organisationPrimaryKeyColumns),
-	)
-	values := []interface{}{related.ID, o.ID}
-
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, updateQuery)
-		fmt.Fprintln(writer, values)
-	}
-	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	o.OrganisationSourceID = related.ID
-	if o.R == nil {
-		o.R = &organisationR{
-			OrganisationSource: related,
-		}
-	} else {
-		o.R.OrganisationSource = related
-	}
-
-	if related.R == nil {
-		related.R = &organisationSourceR{
-			Organisations: OrganisationSlice{o},
-		}
-	} else {
-		related.R.Organisations = append(related.R.Organisations, o)
-	}
-
-	return nil
-}
-
 // SetPostcode of the organisation to the related item.
 // Sets o.R.Postcode to related.
 // Adds o to related.R.Organisations.
@@ -1220,7 +1189,7 @@ func (o *Organisation) SetPostcode(ctx context.Context, exec boil.ContextExecuto
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.PostcodeID, related.ID)
+	o.PostcodeID = related.ID
 	if o.R == nil {
 		o.R = &organisationR{
 			Postcode: related,
@@ -1240,35 +1209,155 @@ func (o *Organisation) SetPostcode(ctx context.Context, exec boil.ContextExecuto
 	return nil
 }
 
-// RemovePostcode relationship.
-// Sets o.R.Postcode to nil.
-// Removes o from all passed in related items' relationships struct.
-func (o *Organisation) RemovePostcode(ctx context.Context, exec boil.ContextExecutor, related *Postcode) error {
+// SetOrganisationStateNSW of the organisation to the related item.
+// Sets o.R.OrganisationStateNSW to related.
+// Adds o to related.R.Organisation.
+func (o *Organisation) SetOrganisationStateNSW(ctx context.Context, exec boil.ContextExecutor, insert bool, related *OrganisationStateNSW) error {
 	var err error
 
-	queries.SetScanner(&o.PostcodeID, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("postcode_id")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
+	if insert {
+		related.OrganisationID = o.ID
 
-	if o.R != nil {
-		o.R.Postcode = nil
-	}
-	if related == nil || related.R == nil {
-		return nil
-	}
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	} else {
+		updateQuery := fmt.Sprintf(
+			"UPDATE \"organisation_state_nsw\" SET %s WHERE %s",
+			strmangle.SetParamNames("\"", "\"", 1, []string{"organisation_id"}),
+			strmangle.WhereClause("\"", "\"", 2, organisationStateNSWPrimaryKeyColumns),
+		)
+		values := []interface{}{o.ID, related.ID}
 
-	for i, ri := range related.R.Organisations {
-		if queries.Equal(o.PostcodeID, ri.PostcodeID) {
-			continue
+		if boil.IsDebug(ctx) {
+			writer := boil.DebugWriterFrom(ctx)
+			fmt.Fprintln(writer, updateQuery)
+			fmt.Fprintln(writer, values)
+		}
+		if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+			return errors.Wrap(err, "failed to update foreign table")
 		}
 
-		ln := len(related.R.Organisations)
-		if ln > 1 && i < ln-1 {
-			related.R.Organisations[i] = related.R.Organisations[ln-1]
+		related.OrganisationID = o.ID
+	}
+
+	if o.R == nil {
+		o.R = &organisationR{
+			OrganisationStateNSW: related,
 		}
-		related.R.Organisations = related.R.Organisations[:ln-1]
-		break
+	} else {
+		o.R.OrganisationStateNSW = related
+	}
+
+	if related.R == nil {
+		related.R = &organisationStateNSWR{
+			Organisation: o,
+		}
+	} else {
+		related.R.Organisation = o
+	}
+	return nil
+}
+
+// SetOrganisationStateVic of the organisation to the related item.
+// Sets o.R.OrganisationStateVic to related.
+// Adds o to related.R.Organisation.
+func (o *Organisation) SetOrganisationStateVic(ctx context.Context, exec boil.ContextExecutor, insert bool, related *OrganisationStateVic) error {
+	var err error
+
+	if insert {
+		related.OrganisationID = o.ID
+
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	} else {
+		updateQuery := fmt.Sprintf(
+			"UPDATE \"organisation_state_vic\" SET %s WHERE %s",
+			strmangle.SetParamNames("\"", "\"", 1, []string{"organisation_id"}),
+			strmangle.WhereClause("\"", "\"", 2, organisationStateVicPrimaryKeyColumns),
+		)
+		values := []interface{}{o.ID, related.ID}
+
+		if boil.IsDebug(ctx) {
+			writer := boil.DebugWriterFrom(ctx)
+			fmt.Fprintln(writer, updateQuery)
+			fmt.Fprintln(writer, values)
+		}
+		if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+			return errors.Wrap(err, "failed to update foreign table")
+		}
+
+		related.OrganisationID = o.ID
+	}
+
+	if o.R == nil {
+		o.R = &organisationR{
+			OrganisationStateVic: related,
+		}
+	} else {
+		o.R.OrganisationStateVic = related
+	}
+
+	if related.R == nil {
+		related.R = &organisationStateVicR{
+			Organisation: o,
+		}
+	} else {
+		related.R.Organisation = o
+	}
+	return nil
+}
+
+// AddEmailOrganisations adds the given related objects to the existing relationships
+// of the organisation, optionally inserting them as new records.
+// Appends related to o.R.EmailOrganisations.
+// Sets related.R.Organisation appropriately.
+func (o *Organisation) AddEmailOrganisations(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*EmailOrganisation) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.OrganisationID = o.ID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"email_organisation\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"organisation_id"}),
+				strmangle.WhereClause("\"", "\"", 2, emailOrganisationPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.OrganisationID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &organisationR{
+			EmailOrganisations: related,
+		}
+	} else {
+		o.R.EmailOrganisations = append(o.R.EmailOrganisations, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &emailOrganisationR{
+				Organisation: o,
+			}
+		} else {
+			rel.R.Organisation = o
+		}
 	}
 	return nil
 }

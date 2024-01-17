@@ -4,25 +4,29 @@
 package models
 
 var TableNames = struct {
-	AlembicVersion     string
-	Anzsic             string
-	BusinessCode       string
-	Organisation       string
-	OrganisationSource string
-	Postcode           string
-	Sa3                string
-	Sa4                string
-	State              string
-	Transaction        string
+	Anzsic               string
+	BusinessCode         string
+	Email                string
+	EmailOrganisation    string
+	Organisation         string
+	OrganisationStateNSW string
+	OrganisationStateVic string
+	Postcode             string
+	Sa3                  string
+	Sa4                  string
+	SchemaMigrations     string
+	State                string
 }{
-	AlembicVersion:     "alembic_version",
-	Anzsic:             "anzsic",
-	BusinessCode:       "business_code",
-	Organisation:       "organisation",
-	OrganisationSource: "organisation_source",
-	Postcode:           "postcode",
-	Sa3:                "sa3",
-	Sa4:                "sa4",
-	State:              "state",
-	Transaction:        "transaction",
+	Anzsic:               "anzsic",
+	BusinessCode:         "business_code",
+	Email:                "email",
+	EmailOrganisation:    "email_organisation",
+	Organisation:         "organisation",
+	OrganisationStateNSW: "organisation_state_nsw",
+	OrganisationStateVic: "organisation_state_vic",
+	Postcode:             "postcode",
+	Sa3:                  "sa3",
+	Sa4:                  "sa4",
+	SchemaMigrations:     "schema_migrations",
+	State:                "state",
 }

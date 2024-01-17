@@ -74,6 +74,12 @@ func main() {
 
 	boil.SetDB(db)
 
+	tsDebug := false
+	if d, ok := os.LookupEnv("TS_DEBUG"); ok && d == "1" {
+		tsDebug = true
+	}
+	boil.DebugMode = tsDebug
+
 	if doMigrate {
 		err = migrations.DoMigrateDb(postgresURI)
 		if err != nil {

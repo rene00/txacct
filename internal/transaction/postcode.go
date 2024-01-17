@@ -57,24 +57,14 @@ func (tp TransactionPostcode) Handle(ctx context.Context, store Store, transacti
 		}
 		transaction.postcodes = postcodes
 
-		for _, stateName := range allStatesPreferenced() {
-			for _, postcode := range postcodeSlice {
-				state, err := postcode.State().One(ctx, store.DB)
-				if err != nil {
-					return err
-				}
-				if stateName == state.Name {
-					transaction.postcode = postcode
-					transaction.state = state
-					token.SetLocality(true)
-					for _, s := range strings.Split(postcode.Locality, " ") {
-						if strings.ToLower(token.Previous().ValueString()) == strings.ToLower(s) {
-							token.Previous().SetLocality(true)
-						}
-					}
-					return nil
-				}
+		if len(postcodes) == 1 {
+			postcode := postcodes[0]
+			state, err := postcode.State().One(ctx, store.DB)
+			if err != nil {
+				return err
 			}
+			transaction.postcode = postcode
+			transaction.state = state
 		}
 	}
 
