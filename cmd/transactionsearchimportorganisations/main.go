@@ -70,20 +70,49 @@ func main() {
 			for r := range c {
 				switch {
 				case strings.ToLower(state) == "nsw":
-					s := models.OrganisationStateNSW{}
-					d := dataimporter.NewDataImporter(s)
+					d := dataimporter.NewDataImporter(models.OrganisationStateNSW{})
 					if err := d.Do(ctx, db, r); err != nil {
 						return err
 					}
 				case strings.ToLower(state) == "vic":
-					s := models.OrganisationStateVic{}
-					d := dataimporter.NewDataImporter(s)
+					d := dataimporter.NewDataImporter(models.OrganisationStateVic{})
+					if err := d.Do(ctx, db, r); err != nil {
+						return err
+					}
+				case strings.ToLower(state) == "qld":
+					d := dataimporter.NewDataImporter(models.OrganisationStateQLD{})
+					if err := d.Do(ctx, db, r); err != nil {
+						return err
+					}
+				case strings.ToLower(state) == "tasmania":
+					d := dataimporter.NewDataImporter(models.OrganisationStateTasmanium{})
+					if err := d.Do(ctx, db, r); err != nil {
+						return err
+					}
+				case strings.ToLower(state) == "act":
+					d := dataimporter.NewDataImporter(models.OrganisationStateAct{})
+					if err := d.Do(ctx, db, r); err != nil {
+						return err
+					}
+				case strings.ToLower(state) == "sa":
+					d := dataimporter.NewDataImporter(models.OrganisationStateSa{})
+					if err := d.Do(ctx, db, r); err != nil {
+						return err
+					}
+				case strings.ToLower(state) == "nt":
+					d := dataimporter.NewDataImporter(models.OrganisationStateNT{})
+					if err := d.Do(ctx, db, r); err != nil {
+						return err
+					}
+				case strings.ToLower(state) == "wa":
+					d := dataimporter.NewDataImporter(models.OrganisationStateWa{})
 					if err := d.Do(ctx, db, r); err != nil {
 						return err
 					}
 				default:
 					return fmt.Errorf("state not supported")
 				}
+
 			}
 			return nil
 		})

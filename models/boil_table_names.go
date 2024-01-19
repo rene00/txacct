@@ -4,29 +4,41 @@
 package models
 
 var TableNames = struct {
-	Anzsic               string
-	BusinessCode         string
-	Email                string
-	EmailOrganisation    string
-	Organisation         string
-	OrganisationStateNSW string
-	OrganisationStateVic string
-	Postcode             string
-	Sa3                  string
-	Sa4                  string
-	SchemaMigrations     string
-	State                string
+	Anzsic                    string
+	BusinessCode              string
+	Email                     string
+	EmailOrganisation         string
+	Organisation              string
+	OrganisationStateAct      string
+	OrganisationStateNSW      string
+	OrganisationStateNT       string
+	OrganisationStateQLD      string
+	OrganisationStateSa       string
+	OrganisationStateTasmania string
+	OrganisationStateVic      string
+	OrganisationStateWa       string
+	Postcode                  string
+	Sa3                       string
+	Sa4                       string
+	SchemaMigrations          string
+	State                     string
 }{
-	Anzsic:               "anzsic",
-	BusinessCode:         "business_code",
-	Email:                "email",
-	EmailOrganisation:    "email_organisation",
-	Organisation:         "organisation",
-	OrganisationStateNSW: "organisation_state_nsw",
-	OrganisationStateVic: "organisation_state_vic",
-	Postcode:             "postcode",
-	Sa3:                  "sa3",
-	Sa4:                  "sa4",
-	SchemaMigrations:     "schema_migrations",
-	State:                "state",
+	Anzsic:                    "anzsic",
+	BusinessCode:              "business_code",
+	Email:                     "email",
+	EmailOrganisation:         "email_organisation",
+	Organisation:              "organisation",
+	OrganisationStateAct:      "organisation_state_act",
+	OrganisationStateNSW:      "organisation_state_nsw",
+	OrganisationStateNT:       "organisation_state_nt",
+	OrganisationStateQLD:      "organisation_state_qld",
+	OrganisationStateSa:       "organisation_state_sa",
+	OrganisationStateTasmania: "organisation_state_tasmania",
+	OrganisationStateVic:      "organisation_state_vic",
+	OrganisationStateWa:       "organisation_state_wa",
+	Postcode:                  "postcode",
+	Sa3:                       "sa3",
+	Sa4:                       "sa4",
+	SchemaMigrations:          "schema_migrations",
+	State:                     "state",
 }

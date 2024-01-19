@@ -236,8 +236,6 @@ ALTER TABLE ONLY email_organisation
 ALTER TABLE ONLY email_organisation
     ADD CONSTRAINT email_organisation_unique UNIQUE (email_id, organisation_id);
 
-/* DEBUG:[]string{"EMAIL-2", "WEBSITE", "FACEBOOK", "TWITTER", "LINKEDIN", "EMPLOYEES", "REVENUE-$M", "YEAR-ESTABLISHED", "CONTACT-NAME", "CONTACT-FIRST-NAME", "CONTACT-JOB-TITLE", "ABN", "ABN-STATUS", "STATUS-DATE", "ENTITY-TYPE-CODE", "ANZSIC-CODE", "LATITUDE", "LONGITUDE", "MAPLINK", "ID-ORG"}              */
-
 /* organisation_state_vic */
 CREATE TABLE organisation_state_vic (
     id integer NOT NULL,
@@ -315,3 +313,237 @@ ALTER TABLE ONLY organisation_state_nsw
     ADD CONSTRAINT organisation_state_nsw_organisation_id_unique UNIQUE (organisation_id);
 
 CREATE INDEX organistaion_state_nsw_trgm_idx ON organisation_state_nsw USING GIST (name gist_trgm_ops(siglen=32));
+
+/* organisation_state_act */
+CREATE TABLE organisation_state_act (
+    id integer NOT NULL,
+    organisation_id INTEGER REFERENCES organisation(id) NOT NULL,
+    name character varying NOT NULL,
+    abn character varying,
+    address character varying,
+    record_defunct_risk CHARACTER VARYING,
+    region CHARACTER VARYING,
+    phone CHARACTER VARYING,
+    mobile CHARACTER VARYING,
+    freecall CHARACTER VARYING,
+    fax CHARACTER VARYING
+);
+
+CREATE SEQUENCE organisation_state_act_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE organisation_state_act_id_seq OWNED BY organisation_state_act.id;
+
+ALTER TABLE ONLY organisation_state_act 
+    ALTER COLUMN id SET DEFAULT nextval('organisation_state_act_id_seq'::regclass);
+
+ALTER TABLE ONLY organisation_state_act 
+    ADD CONSTRAINT organisation_state_act_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY organisation_state_act
+    ADD CONSTRAINT organisation_state_act_name_address_region_unique UNIQUE (name, address, region);
+
+ALTER TABLE ONLY organisation_state_act
+    ADD CONSTRAINT organisation_state_act_organisation_id_unique UNIQUE (organisation_id);
+
+CREATE INDEX organistaion_state_act_trgm_idx ON organisation_state_act USING GIST (name gist_trgm_ops(siglen=32));
+
+/* organisation_state_qld */
+CREATE TABLE organisation_state_qld (
+    id integer NOT NULL,
+    organisation_id INTEGER REFERENCES organisation(id) NOT NULL,
+    name character varying NOT NULL,
+    abn character varying,
+    address character varying,
+    record_defunct_risk CHARACTER VARYING,
+    region CHARACTER VARYING,
+    phone CHARACTER VARYING,
+    mobile CHARACTER VARYING,
+    freecall CHARACTER VARYING,
+    fax CHARACTER VARYING
+);
+
+CREATE SEQUENCE organisation_state_qld_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE organisation_state_qld_id_seq OWNED BY organisation_state_qld.id;
+
+ALTER TABLE ONLY organisation_state_qld 
+    ALTER COLUMN id SET DEFAULT nextval('organisation_state_qld_id_seq'::regclass);
+
+ALTER TABLE ONLY organisation_state_qld 
+    ADD CONSTRAINT organisation_state_qld_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY organisation_state_qld
+    ADD CONSTRAINT organisation_state_qld_name_address_region_unique UNIQUE (name, address, region);
+
+ALTER TABLE ONLY organisation_state_qld
+    ADD CONSTRAINT organisation_state_qld_organisation_id_unique UNIQUE (organisation_id);
+
+CREATE INDEX organistaion_state_qld_trgm_idx ON organisation_state_qld USING GIST (name gist_trgm_ops(siglen=32));
+
+/* organisation_state_tasmania */
+CREATE TABLE organisation_state_tasmania (
+    id integer NOT NULL,
+    organisation_id INTEGER REFERENCES organisation(id) NOT NULL,
+    name character varying NOT NULL,
+    abn character varying,
+    address character varying,
+    record_defunct_risk CHARACTER VARYING,
+    region CHARACTER VARYING,
+    phone CHARACTER VARYING,
+    mobile CHARACTER VARYING,
+    freecall CHARACTER VARYING,
+    fax CHARACTER VARYING
+);
+
+CREATE SEQUENCE organisation_state_tasmania_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE organisation_state_tasmania_id_seq OWNED BY organisation_state_tasmania.id;
+
+ALTER TABLE ONLY organisation_state_tasmania 
+    ALTER COLUMN id SET DEFAULT nextval('organisation_state_tasmania_id_seq'::regclass);
+
+ALTER TABLE ONLY organisation_state_tasmania 
+    ADD CONSTRAINT organisation_state_tasmania_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY organisation_state_tasmania
+    ADD CONSTRAINT organisation_state_tasmania_name_address_region_unique UNIQUE (name, address, region);
+
+ALTER TABLE ONLY organisation_state_tasmania
+    ADD CONSTRAINT organisation_state_tasmania_organisation_id_unique UNIQUE (organisation_id);
+
+CREATE INDEX organistaion_state_tasmania_trgm_idx ON organisation_state_tasmania USING GIST (name gist_trgm_ops(siglen=32));
+
+/* organisation_state_sa */
+CREATE TABLE organisation_state_sa (
+    id integer NOT NULL,
+    organisation_id INTEGER REFERENCES organisation(id) NOT NULL,
+    name character varying NOT NULL,
+    abn character varying,
+    address character varying,
+    record_defunct_risk CHARACTER VARYING,
+    region CHARACTER VARYING,
+    phone CHARACTER VARYING,
+    mobile CHARACTER VARYING,
+    freecall CHARACTER VARYING,
+    fax CHARACTER VARYING
+);
+
+CREATE SEQUENCE organisation_state_sa_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE organisation_state_sa_id_seq OWNED BY organisation_state_sa.id;
+
+ALTER TABLE ONLY organisation_state_sa 
+    ALTER COLUMN id SET DEFAULT nextval('organisation_state_sa_id_seq'::regclass);
+
+ALTER TABLE ONLY organisation_state_sa 
+    ADD CONSTRAINT organisation_state_sa_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY organisation_state_sa
+    ADD CONSTRAINT organisation_state_sa_name_address_region_unique UNIQUE (name, address, region);
+
+ALTER TABLE ONLY organisation_state_sa
+    ADD CONSTRAINT organisation_state_sa_organisation_id_unique UNIQUE (organisation_id);
+
+CREATE INDEX organistaion_state_sa_trgm_idx ON organisation_state_sa USING GIST (name gist_trgm_ops(siglen=32));
+
+/* organisation_state_nt */
+CREATE TABLE organisation_state_nt (
+    id integer NOT NULL,
+    organisation_id INTEGER REFERENCES organisation(id) NOT NULL,
+    name character varying NOT NULL,
+    abn character varying,
+    address character varying,
+    record_defunct_risk CHARACTER VARYING,
+    region CHARACTER VARYING,
+    phone CHARACTER VARYING,
+    mobile CHARACTER VARYING,
+    freecall CHARACTER VARYING,
+    fax CHARACTER VARYING
+);
+
+CREATE SEQUENCE organisation_state_nt_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE organisation_state_nt_id_seq OWNED BY organisation_state_nt.id;
+
+ALTER TABLE ONLY organisation_state_nt 
+    ALTER COLUMN id SET DEFAULT nextval('organisation_state_nt_id_seq'::regclass);
+
+ALTER TABLE ONLY organisation_state_nt 
+    ADD CONSTRAINT organisation_state_nt_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY organisation_state_nt
+    ADD CONSTRAINT organisation_state_nt_name_address_region_unique UNIQUE (name, address, region);
+
+ALTER TABLE ONLY organisation_state_nt
+    ADD CONSTRAINT organisation_state_nt_organisation_id_unique UNIQUE (organisation_id);
+
+CREATE INDEX organistaion_state_nt_trgm_idx ON organisation_state_nt USING GIST (name gist_trgm_ops(siglen=32));
+
+/* organisation_state_wa */
+CREATE TABLE organisation_state_wa (
+    id integer NOT NULL,
+    organisation_id INTEGER REFERENCES organisation(id) NOT NULL,
+    name character varying NOT NULL,
+    abn character varying,
+    address character varying,
+    record_defunct_risk CHARACTER VARYING,
+    region CHARACTER VARYING,
+    phone CHARACTER VARYING,
+    mobile CHARACTER VARYING,
+    freecall CHARACTER VARYING,
+    fax CHARACTER VARYING
+);
+
+CREATE SEQUENCE organisation_state_wa_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE organisation_state_wa_id_seq OWNED BY organisation_state_wa.id;
+
+ALTER TABLE ONLY organisation_state_wa 
+    ALTER COLUMN id SET DEFAULT nextval('organisation_state_wa_id_seq'::regclass);
+
+ALTER TABLE ONLY organisation_state_wa 
+    ADD CONSTRAINT organisation_state_wa_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY organisation_state_wa
+    ADD CONSTRAINT organisation_state_wa_name_address_region_unique UNIQUE (name, address, region);
+
+ALTER TABLE ONLY organisation_state_wa
+    ADD CONSTRAINT organisation_state_wa_organisation_id_unique UNIQUE (organisation_id);
+
+CREATE INDEX organistaion_state_wa_trgm_idx ON organisation_state_wa USING GIST (name gist_trgm_ops(siglen=32));

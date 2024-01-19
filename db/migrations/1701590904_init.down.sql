@@ -28,6 +28,23 @@ DROP TABLE organisation_state_vic CASCADE;
 /* organisation_state_nsw */
 DROP TABLE organisation_state_nsw CASCADE;
 
+/* organisation_state_act */
+DROP TABLE organisation_state_act CASCADE;
+
+/* organisation_state_qld */
+DROP TABLE organisation_state_qld CASCADE;
+
+/* organisation_state_tasmania */
+DROP TABLE organisation_state_tasmania CASCADE;
+
+/* organisation_state_nt */
+DROP TABLE organisation_state_nt CASCADE;
+
+/* organisation_state_sa */
+DROP TABLE organisation_state_sa CASCADE;
+
+/* organisation_state_wa */
+DROP TABLE organisation_state_wa CASCADE;
+
 /* organisation */
 DROP TABLE organisation CASCADE;
-

@@ -118,26 +118,44 @@ var OrganisationWhere = struct {
 
 // OrganisationRels is where relationship names are stored.
 var OrganisationRels = struct {
-	BusinessCode         string
-	Postcode             string
-	OrganisationStateNSW string
-	OrganisationStateVic string
-	EmailOrganisations   string
+	BusinessCode               string
+	Postcode                   string
+	OrganisationStateAct       string
+	OrganisationStateNSW       string
+	OrganisationStateNT        string
+	OrganisationStateQLD       string
+	OrganisationStateSa        string
+	OrganisationStateTasmanium string
+	OrganisationStateVic       string
+	OrganisationStateWa        string
+	EmailOrganisations         string
 }{
-	BusinessCode:         "BusinessCode",
-	Postcode:             "Postcode",
-	OrganisationStateNSW: "OrganisationStateNSW",
-	OrganisationStateVic: "OrganisationStateVic",
-	EmailOrganisations:   "EmailOrganisations",
+	BusinessCode:               "BusinessCode",
+	Postcode:                   "Postcode",
+	OrganisationStateAct:       "OrganisationStateAct",
+	OrganisationStateNSW:       "OrganisationStateNSW",
+	OrganisationStateNT:        "OrganisationStateNT",
+	OrganisationStateQLD:       "OrganisationStateQLD",
+	OrganisationStateSa:        "OrganisationStateSa",
+	OrganisationStateTasmanium: "OrganisationStateTasmanium",
+	OrganisationStateVic:       "OrganisationStateVic",
+	OrganisationStateWa:        "OrganisationStateWa",
+	EmailOrganisations:         "EmailOrganisations",
 }
 
 // organisationR is where relationships are stored.
 type organisationR struct {
-	BusinessCode         *BusinessCode          `boil:"BusinessCode" json:"BusinessCode" toml:"BusinessCode" yaml:"BusinessCode"`
-	Postcode             *Postcode              `boil:"Postcode" json:"Postcode" toml:"Postcode" yaml:"Postcode"`
-	OrganisationStateNSW *OrganisationStateNSW  `boil:"OrganisationStateNSW" json:"OrganisationStateNSW" toml:"OrganisationStateNSW" yaml:"OrganisationStateNSW"`
-	OrganisationStateVic *OrganisationStateVic  `boil:"OrganisationStateVic" json:"OrganisationStateVic" toml:"OrganisationStateVic" yaml:"OrganisationStateVic"`
-	EmailOrganisations   EmailOrganisationSlice `boil:"EmailOrganisations" json:"EmailOrganisations" toml:"EmailOrganisations" yaml:"EmailOrganisations"`
+	BusinessCode               *BusinessCode               `boil:"BusinessCode" json:"BusinessCode" toml:"BusinessCode" yaml:"BusinessCode"`
+	Postcode                   *Postcode                   `boil:"Postcode" json:"Postcode" toml:"Postcode" yaml:"Postcode"`
+	OrganisationStateAct       *OrganisationStateAct       `boil:"OrganisationStateAct" json:"OrganisationStateAct" toml:"OrganisationStateAct" yaml:"OrganisationStateAct"`
+	OrganisationStateNSW       *OrganisationStateNSW       `boil:"OrganisationStateNSW" json:"OrganisationStateNSW" toml:"OrganisationStateNSW" yaml:"OrganisationStateNSW"`
+	OrganisationStateNT        *OrganisationStateNT        `boil:"OrganisationStateNT" json:"OrganisationStateNT" toml:"OrganisationStateNT" yaml:"OrganisationStateNT"`
+	OrganisationStateQLD       *OrganisationStateQLD       `boil:"OrganisationStateQLD" json:"OrganisationStateQLD" toml:"OrganisationStateQLD" yaml:"OrganisationStateQLD"`
+	OrganisationStateSa        *OrganisationStateSa        `boil:"OrganisationStateSa" json:"OrganisationStateSa" toml:"OrganisationStateSa" yaml:"OrganisationStateSa"`
+	OrganisationStateTasmanium *OrganisationStateTasmanium `boil:"OrganisationStateTasmanium" json:"OrganisationStateTasmanium" toml:"OrganisationStateTasmanium" yaml:"OrganisationStateTasmanium"`
+	OrganisationStateVic       *OrganisationStateVic       `boil:"OrganisationStateVic" json:"OrganisationStateVic" toml:"OrganisationStateVic" yaml:"OrganisationStateVic"`
+	OrganisationStateWa        *OrganisationStateWa        `boil:"OrganisationStateWa" json:"OrganisationStateWa" toml:"OrganisationStateWa" yaml:"OrganisationStateWa"`
+	EmailOrganisations         EmailOrganisationSlice      `boil:"EmailOrganisations" json:"EmailOrganisations" toml:"EmailOrganisations" yaml:"EmailOrganisations"`
 }
 
 // NewStruct creates a new relationship struct
@@ -159,6 +177,13 @@ func (r *organisationR) GetPostcode() *Postcode {
 	return r.Postcode
 }
 
+func (r *organisationR) GetOrganisationStateAct() *OrganisationStateAct {
+	if r == nil {
+		return nil
+	}
+	return r.OrganisationStateAct
+}
+
 func (r *organisationR) GetOrganisationStateNSW() *OrganisationStateNSW {
 	if r == nil {
 		return nil
@@ -166,11 +191,46 @@ func (r *organisationR) GetOrganisationStateNSW() *OrganisationStateNSW {
 	return r.OrganisationStateNSW
 }
 
+func (r *organisationR) GetOrganisationStateNT() *OrganisationStateNT {
+	if r == nil {
+		return nil
+	}
+	return r.OrganisationStateNT
+}
+
+func (r *organisationR) GetOrganisationStateQLD() *OrganisationStateQLD {
+	if r == nil {
+		return nil
+	}
+	return r.OrganisationStateQLD
+}
+
+func (r *organisationR) GetOrganisationStateSa() *OrganisationStateSa {
+	if r == nil {
+		return nil
+	}
+	return r.OrganisationStateSa
+}
+
+func (r *organisationR) GetOrganisationStateTasmanium() *OrganisationStateTasmanium {
+	if r == nil {
+		return nil
+	}
+	return r.OrganisationStateTasmanium
+}
+
 func (r *organisationR) GetOrganisationStateVic() *OrganisationStateVic {
 	if r == nil {
 		return nil
 	}
 	return r.OrganisationStateVic
+}
+
+func (r *organisationR) GetOrganisationStateWa() *OrganisationStateWa {
+	if r == nil {
+		return nil
+	}
+	return r.OrganisationStateWa
 }
 
 func (r *organisationR) GetEmailOrganisations() EmailOrganisationSlice {
@@ -491,6 +551,17 @@ func (o *Organisation) Postcode(mods ...qm.QueryMod) postcodeQuery {
 	return Postcodes(queryMods...)
 }
 
+// OrganisationStateAct pointed to by the foreign key.
+func (o *Organisation) OrganisationStateAct(mods ...qm.QueryMod) organisationStateActQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"organisation_id\" = ?", o.ID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return OrganisationStateActs(queryMods...)
+}
+
 // OrganisationStateNSW pointed to by the foreign key.
 func (o *Organisation) OrganisationStateNSW(mods ...qm.QueryMod) organisationStateNSWQuery {
 	queryMods := []qm.QueryMod{
@@ -502,6 +573,50 @@ func (o *Organisation) OrganisationStateNSW(mods ...qm.QueryMod) organisationSta
 	return OrganisationStateNSWS(queryMods...)
 }
 
+// OrganisationStateNT pointed to by the foreign key.
+func (o *Organisation) OrganisationStateNT(mods ...qm.QueryMod) organisationStateNTQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"organisation_id\" = ?", o.ID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return OrganisationStateNTS(queryMods...)
+}
+
+// OrganisationStateQLD pointed to by the foreign key.
+func (o *Organisation) OrganisationStateQLD(mods ...qm.QueryMod) organisationStateQLDQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"organisation_id\" = ?", o.ID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return OrganisationStateQLDS(queryMods...)
+}
+
+// OrganisationStateSa pointed to by the foreign key.
+func (o *Organisation) OrganisationStateSa(mods ...qm.QueryMod) organisationStateSaQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"organisation_id\" = ?", o.ID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return OrganisationStateSas(queryMods...)
+}
+
+// OrganisationStateTasmanium pointed to by the foreign key.
+func (o *Organisation) OrganisationStateTasmanium(mods ...qm.QueryMod) organisationStateTasmaniumQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"organisation_id\" = ?", o.ID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return OrganisationStateTasmania(queryMods...)
+}
+
 // OrganisationStateVic pointed to by the foreign key.
 func (o *Organisation) OrganisationStateVic(mods ...qm.QueryMod) organisationStateVicQuery {
 	queryMods := []qm.QueryMod{
@@ -511,6 +626,17 @@ func (o *Organisation) OrganisationStateVic(mods ...qm.QueryMod) organisationSta
 	queryMods = append(queryMods, mods...)
 
 	return OrganisationStateVics(queryMods...)
+}
+
+// OrganisationStateWa pointed to by the foreign key.
+func (o *Organisation) OrganisationStateWa(mods ...qm.QueryMod) organisationStateWaQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"organisation_id\" = ?", o.ID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return OrganisationStateWas(queryMods...)
 }
 
 // EmailOrganisations retrieves all the email_organisation's EmailOrganisations with an executor.
@@ -767,6 +893,123 @@ func (organisationL) LoadPostcode(ctx context.Context, e boil.ContextExecutor, s
 	return nil
 }
 
+// LoadOrganisationStateAct allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-1 relationship.
+func (organisationL) LoadOrganisationStateAct(ctx context.Context, e boil.ContextExecutor, singular bool, maybeOrganisation interface{}, mods queries.Applicator) error {
+	var slice []*Organisation
+	var object *Organisation
+
+	if singular {
+		var ok bool
+		object, ok = maybeOrganisation.(*Organisation)
+		if !ok {
+			object = new(Organisation)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeOrganisation)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeOrganisation))
+			}
+		}
+	} else {
+		s, ok := maybeOrganisation.(*[]*Organisation)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeOrganisation)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeOrganisation))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &organisationR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &organisationR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`organisation_state_act`),
+		qm.WhereIn(`organisation_state_act.organisation_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load OrganisationStateAct")
+	}
+
+	var resultSlice []*OrganisationStateAct
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice OrganisationStateAct")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for organisation_state_act")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for organisation_state_act")
+	}
+
+	if len(organisationStateActAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.OrganisationStateAct = foreign
+		if foreign.R == nil {
+			foreign.R = &organisationStateActR{}
+		}
+		foreign.R.Organisation = object
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.ID == foreign.OrganisationID {
+				local.R.OrganisationStateAct = foreign
+				if foreign.R == nil {
+					foreign.R = &organisationStateActR{}
+				}
+				foreign.R.Organisation = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
 // LoadOrganisationStateNSW allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-1 relationship.
 func (organisationL) LoadOrganisationStateNSW(ctx context.Context, e boil.ContextExecutor, singular bool, maybeOrganisation interface{}, mods queries.Applicator) error {
@@ -884,6 +1127,474 @@ func (organisationL) LoadOrganisationStateNSW(ctx context.Context, e boil.Contex
 	return nil
 }
 
+// LoadOrganisationStateNT allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-1 relationship.
+func (organisationL) LoadOrganisationStateNT(ctx context.Context, e boil.ContextExecutor, singular bool, maybeOrganisation interface{}, mods queries.Applicator) error {
+	var slice []*Organisation
+	var object *Organisation
+
+	if singular {
+		var ok bool
+		object, ok = maybeOrganisation.(*Organisation)
+		if !ok {
+			object = new(Organisation)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeOrganisation)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeOrganisation))
+			}
+		}
+	} else {
+		s, ok := maybeOrganisation.(*[]*Organisation)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeOrganisation)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeOrganisation))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &organisationR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &organisationR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`organisation_state_nt`),
+		qm.WhereIn(`organisation_state_nt.organisation_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load OrganisationStateNT")
+	}
+
+	var resultSlice []*OrganisationStateNT
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice OrganisationStateNT")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for organisation_state_nt")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for organisation_state_nt")
+	}
+
+	if len(organisationStateNTAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.OrganisationStateNT = foreign
+		if foreign.R == nil {
+			foreign.R = &organisationStateNTR{}
+		}
+		foreign.R.Organisation = object
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.ID == foreign.OrganisationID {
+				local.R.OrganisationStateNT = foreign
+				if foreign.R == nil {
+					foreign.R = &organisationStateNTR{}
+				}
+				foreign.R.Organisation = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadOrganisationStateQLD allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-1 relationship.
+func (organisationL) LoadOrganisationStateQLD(ctx context.Context, e boil.ContextExecutor, singular bool, maybeOrganisation interface{}, mods queries.Applicator) error {
+	var slice []*Organisation
+	var object *Organisation
+
+	if singular {
+		var ok bool
+		object, ok = maybeOrganisation.(*Organisation)
+		if !ok {
+			object = new(Organisation)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeOrganisation)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeOrganisation))
+			}
+		}
+	} else {
+		s, ok := maybeOrganisation.(*[]*Organisation)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeOrganisation)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeOrganisation))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &organisationR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &organisationR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`organisation_state_qld`),
+		qm.WhereIn(`organisation_state_qld.organisation_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load OrganisationStateQLD")
+	}
+
+	var resultSlice []*OrganisationStateQLD
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice OrganisationStateQLD")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for organisation_state_qld")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for organisation_state_qld")
+	}
+
+	if len(organisationStateQLDAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.OrganisationStateQLD = foreign
+		if foreign.R == nil {
+			foreign.R = &organisationStateQLDR{}
+		}
+		foreign.R.Organisation = object
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.ID == foreign.OrganisationID {
+				local.R.OrganisationStateQLD = foreign
+				if foreign.R == nil {
+					foreign.R = &organisationStateQLDR{}
+				}
+				foreign.R.Organisation = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadOrganisationStateSa allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-1 relationship.
+func (organisationL) LoadOrganisationStateSa(ctx context.Context, e boil.ContextExecutor, singular bool, maybeOrganisation interface{}, mods queries.Applicator) error {
+	var slice []*Organisation
+	var object *Organisation
+
+	if singular {
+		var ok bool
+		object, ok = maybeOrganisation.(*Organisation)
+		if !ok {
+			object = new(Organisation)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeOrganisation)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeOrganisation))
+			}
+		}
+	} else {
+		s, ok := maybeOrganisation.(*[]*Organisation)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeOrganisation)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeOrganisation))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &organisationR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &organisationR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`organisation_state_sa`),
+		qm.WhereIn(`organisation_state_sa.organisation_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load OrganisationStateSa")
+	}
+
+	var resultSlice []*OrganisationStateSa
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice OrganisationStateSa")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for organisation_state_sa")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for organisation_state_sa")
+	}
+
+	if len(organisationStateSaAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.OrganisationStateSa = foreign
+		if foreign.R == nil {
+			foreign.R = &organisationStateSaR{}
+		}
+		foreign.R.Organisation = object
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.ID == foreign.OrganisationID {
+				local.R.OrganisationStateSa = foreign
+				if foreign.R == nil {
+					foreign.R = &organisationStateSaR{}
+				}
+				foreign.R.Organisation = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadOrganisationStateTasmanium allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-1 relationship.
+func (organisationL) LoadOrganisationStateTasmanium(ctx context.Context, e boil.ContextExecutor, singular bool, maybeOrganisation interface{}, mods queries.Applicator) error {
+	var slice []*Organisation
+	var object *Organisation
+
+	if singular {
+		var ok bool
+		object, ok = maybeOrganisation.(*Organisation)
+		if !ok {
+			object = new(Organisation)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeOrganisation)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeOrganisation))
+			}
+		}
+	} else {
+		s, ok := maybeOrganisation.(*[]*Organisation)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeOrganisation)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeOrganisation))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &organisationR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &organisationR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`organisation_state_tasmania`),
+		qm.WhereIn(`organisation_state_tasmania.organisation_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load OrganisationStateTasmanium")
+	}
+
+	var resultSlice []*OrganisationStateTasmanium
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice OrganisationStateTasmanium")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for organisation_state_tasmania")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for organisation_state_tasmania")
+	}
+
+	if len(organisationStateTasmaniumAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.OrganisationStateTasmanium = foreign
+		if foreign.R == nil {
+			foreign.R = &organisationStateTasmaniumR{}
+		}
+		foreign.R.Organisation = object
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.ID == foreign.OrganisationID {
+				local.R.OrganisationStateTasmanium = foreign
+				if foreign.R == nil {
+					foreign.R = &organisationStateTasmaniumR{}
+				}
+				foreign.R.Organisation = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
 // LoadOrganisationStateVic allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-1 relationship.
 func (organisationL) LoadOrganisationStateVic(ctx context.Context, e boil.ContextExecutor, singular bool, maybeOrganisation interface{}, mods queries.Applicator) error {
@@ -991,6 +1702,123 @@ func (organisationL) LoadOrganisationStateVic(ctx context.Context, e boil.Contex
 				local.R.OrganisationStateVic = foreign
 				if foreign.R == nil {
 					foreign.R = &organisationStateVicR{}
+				}
+				foreign.R.Organisation = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadOrganisationStateWa allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-1 relationship.
+func (organisationL) LoadOrganisationStateWa(ctx context.Context, e boil.ContextExecutor, singular bool, maybeOrganisation interface{}, mods queries.Applicator) error {
+	var slice []*Organisation
+	var object *Organisation
+
+	if singular {
+		var ok bool
+		object, ok = maybeOrganisation.(*Organisation)
+		if !ok {
+			object = new(Organisation)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeOrganisation)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeOrganisation))
+			}
+		}
+	} else {
+		s, ok := maybeOrganisation.(*[]*Organisation)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeOrganisation)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeOrganisation))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &organisationR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &organisationR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`organisation_state_wa`),
+		qm.WhereIn(`organisation_state_wa.organisation_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load OrganisationStateWa")
+	}
+
+	var resultSlice []*OrganisationStateWa
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice OrganisationStateWa")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for organisation_state_wa")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for organisation_state_wa")
+	}
+
+	if len(organisationStateWaAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.OrganisationStateWa = foreign
+		if foreign.R == nil {
+			foreign.R = &organisationStateWaR{}
+		}
+		foreign.R.Organisation = object
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.ID == foreign.OrganisationID {
+				local.R.OrganisationStateWa = foreign
+				if foreign.R == nil {
+					foreign.R = &organisationStateWaR{}
 				}
 				foreign.R.Organisation = local
 				break
@@ -1209,6 +2037,56 @@ func (o *Organisation) SetPostcode(ctx context.Context, exec boil.ContextExecuto
 	return nil
 }
 
+// SetOrganisationStateAct of the organisation to the related item.
+// Sets o.R.OrganisationStateAct to related.
+// Adds o to related.R.Organisation.
+func (o *Organisation) SetOrganisationStateAct(ctx context.Context, exec boil.ContextExecutor, insert bool, related *OrganisationStateAct) error {
+	var err error
+
+	if insert {
+		related.OrganisationID = o.ID
+
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	} else {
+		updateQuery := fmt.Sprintf(
+			"UPDATE \"organisation_state_act\" SET %s WHERE %s",
+			strmangle.SetParamNames("\"", "\"", 1, []string{"organisation_id"}),
+			strmangle.WhereClause("\"", "\"", 2, organisationStateActPrimaryKeyColumns),
+		)
+		values := []interface{}{o.ID, related.ID}
+
+		if boil.IsDebug(ctx) {
+			writer := boil.DebugWriterFrom(ctx)
+			fmt.Fprintln(writer, updateQuery)
+			fmt.Fprintln(writer, values)
+		}
+		if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+			return errors.Wrap(err, "failed to update foreign table")
+		}
+
+		related.OrganisationID = o.ID
+	}
+
+	if o.R == nil {
+		o.R = &organisationR{
+			OrganisationStateAct: related,
+		}
+	} else {
+		o.R.OrganisationStateAct = related
+	}
+
+	if related.R == nil {
+		related.R = &organisationStateActR{
+			Organisation: o,
+		}
+	} else {
+		related.R.Organisation = o
+	}
+	return nil
+}
+
 // SetOrganisationStateNSW of the organisation to the related item.
 // Sets o.R.OrganisationStateNSW to related.
 // Adds o to related.R.Organisation.
@@ -1259,6 +2137,206 @@ func (o *Organisation) SetOrganisationStateNSW(ctx context.Context, exec boil.Co
 	return nil
 }
 
+// SetOrganisationStateNT of the organisation to the related item.
+// Sets o.R.OrganisationStateNT to related.
+// Adds o to related.R.Organisation.
+func (o *Organisation) SetOrganisationStateNT(ctx context.Context, exec boil.ContextExecutor, insert bool, related *OrganisationStateNT) error {
+	var err error
+
+	if insert {
+		related.OrganisationID = o.ID
+
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	} else {
+		updateQuery := fmt.Sprintf(
+			"UPDATE \"organisation_state_nt\" SET %s WHERE %s",
+			strmangle.SetParamNames("\"", "\"", 1, []string{"organisation_id"}),
+			strmangle.WhereClause("\"", "\"", 2, organisationStateNTPrimaryKeyColumns),
+		)
+		values := []interface{}{o.ID, related.ID}
+
+		if boil.IsDebug(ctx) {
+			writer := boil.DebugWriterFrom(ctx)
+			fmt.Fprintln(writer, updateQuery)
+			fmt.Fprintln(writer, values)
+		}
+		if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+			return errors.Wrap(err, "failed to update foreign table")
+		}
+
+		related.OrganisationID = o.ID
+	}
+
+	if o.R == nil {
+		o.R = &organisationR{
+			OrganisationStateNT: related,
+		}
+	} else {
+		o.R.OrganisationStateNT = related
+	}
+
+	if related.R == nil {
+		related.R = &organisationStateNTR{
+			Organisation: o,
+		}
+	} else {
+		related.R.Organisation = o
+	}
+	return nil
+}
+
+// SetOrganisationStateQLD of the organisation to the related item.
+// Sets o.R.OrganisationStateQLD to related.
+// Adds o to related.R.Organisation.
+func (o *Organisation) SetOrganisationStateQLD(ctx context.Context, exec boil.ContextExecutor, insert bool, related *OrganisationStateQLD) error {
+	var err error
+
+	if insert {
+		related.OrganisationID = o.ID
+
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	} else {
+		updateQuery := fmt.Sprintf(
+			"UPDATE \"organisation_state_qld\" SET %s WHERE %s",
+			strmangle.SetParamNames("\"", "\"", 1, []string{"organisation_id"}),
+			strmangle.WhereClause("\"", "\"", 2, organisationStateQLDPrimaryKeyColumns),
+		)
+		values := []interface{}{o.ID, related.ID}
+
+		if boil.IsDebug(ctx) {
+			writer := boil.DebugWriterFrom(ctx)
+			fmt.Fprintln(writer, updateQuery)
+			fmt.Fprintln(writer, values)
+		}
+		if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+			return errors.Wrap(err, "failed to update foreign table")
+		}
+
+		related.OrganisationID = o.ID
+	}
+
+	if o.R == nil {
+		o.R = &organisationR{
+			OrganisationStateQLD: related,
+		}
+	} else {
+		o.R.OrganisationStateQLD = related
+	}
+
+	if related.R == nil {
+		related.R = &organisationStateQLDR{
+			Organisation: o,
+		}
+	} else {
+		related.R.Organisation = o
+	}
+	return nil
+}
+
+// SetOrganisationStateSa of the organisation to the related item.
+// Sets o.R.OrganisationStateSa to related.
+// Adds o to related.R.Organisation.
+func (o *Organisation) SetOrganisationStateSa(ctx context.Context, exec boil.ContextExecutor, insert bool, related *OrganisationStateSa) error {
+	var err error
+
+	if insert {
+		related.OrganisationID = o.ID
+
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	} else {
+		updateQuery := fmt.Sprintf(
+			"UPDATE \"organisation_state_sa\" SET %s WHERE %s",
+			strmangle.SetParamNames("\"", "\"", 1, []string{"organisation_id"}),
+			strmangle.WhereClause("\"", "\"", 2, organisationStateSaPrimaryKeyColumns),
+		)
+		values := []interface{}{o.ID, related.ID}
+
+		if boil.IsDebug(ctx) {
+			writer := boil.DebugWriterFrom(ctx)
+			fmt.Fprintln(writer, updateQuery)
+			fmt.Fprintln(writer, values)
+		}
+		if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+			return errors.Wrap(err, "failed to update foreign table")
+		}
+
+		related.OrganisationID = o.ID
+	}
+
+	if o.R == nil {
+		o.R = &organisationR{
+			OrganisationStateSa: related,
+		}
+	} else {
+		o.R.OrganisationStateSa = related
+	}
+
+	if related.R == nil {
+		related.R = &organisationStateSaR{
+			Organisation: o,
+		}
+	} else {
+		related.R.Organisation = o
+	}
+	return nil
+}
+
+// SetOrganisationStateTasmanium of the organisation to the related item.
+// Sets o.R.OrganisationStateTasmanium to related.
+// Adds o to related.R.Organisation.
+func (o *Organisation) SetOrganisationStateTasmanium(ctx context.Context, exec boil.ContextExecutor, insert bool, related *OrganisationStateTasmanium) error {
+	var err error
+
+	if insert {
+		related.OrganisationID = o.ID
+
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	} else {
+		updateQuery := fmt.Sprintf(
+			"UPDATE \"organisation_state_tasmania\" SET %s WHERE %s",
+			strmangle.SetParamNames("\"", "\"", 1, []string{"organisation_id"}),
+			strmangle.WhereClause("\"", "\"", 2, organisationStateTasmaniumPrimaryKeyColumns),
+		)
+		values := []interface{}{o.ID, related.ID}
+
+		if boil.IsDebug(ctx) {
+			writer := boil.DebugWriterFrom(ctx)
+			fmt.Fprintln(writer, updateQuery)
+			fmt.Fprintln(writer, values)
+		}
+		if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+			return errors.Wrap(err, "failed to update foreign table")
+		}
+
+		related.OrganisationID = o.ID
+	}
+
+	if o.R == nil {
+		o.R = &organisationR{
+			OrganisationStateTasmanium: related,
+		}
+	} else {
+		o.R.OrganisationStateTasmanium = related
+	}
+
+	if related.R == nil {
+		related.R = &organisationStateTasmaniumR{
+			Organisation: o,
+		}
+	} else {
+		related.R.Organisation = o
+	}
+	return nil
+}
+
 // SetOrganisationStateVic of the organisation to the related item.
 // Sets o.R.OrganisationStateVic to related.
 // Adds o to related.R.Organisation.
@@ -1301,6 +2379,56 @@ func (o *Organisation) SetOrganisationStateVic(ctx context.Context, exec boil.Co
 
 	if related.R == nil {
 		related.R = &organisationStateVicR{
+			Organisation: o,
+		}
+	} else {
+		related.R.Organisation = o
+	}
+	return nil
+}
+
+// SetOrganisationStateWa of the organisation to the related item.
+// Sets o.R.OrganisationStateWa to related.
+// Adds o to related.R.Organisation.
+func (o *Organisation) SetOrganisationStateWa(ctx context.Context, exec boil.ContextExecutor, insert bool, related *OrganisationStateWa) error {
+	var err error
+
+	if insert {
+		related.OrganisationID = o.ID
+
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	} else {
+		updateQuery := fmt.Sprintf(
+			"UPDATE \"organisation_state_wa\" SET %s WHERE %s",
+			strmangle.SetParamNames("\"", "\"", 1, []string{"organisation_id"}),
+			strmangle.WhereClause("\"", "\"", 2, organisationStateWaPrimaryKeyColumns),
+		)
+		values := []interface{}{o.ID, related.ID}
+
+		if boil.IsDebug(ctx) {
+			writer := boil.DebugWriterFrom(ctx)
+			fmt.Fprintln(writer, updateQuery)
+			fmt.Fprintln(writer, values)
+		}
+		if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+			return errors.Wrap(err, "failed to update foreign table")
+		}
+
+		related.OrganisationID = o.ID
+	}
+
+	if o.R == nil {
+		o.R = &organisationR{
+			OrganisationStateWa: related,
+		}
+	} else {
+		o.R.OrganisationStateWa = related
+	}
+
+	if related.R == nil {
+		related.R = &organisationStateWaR{
 			Organisation: o,
 		}
 	} else {

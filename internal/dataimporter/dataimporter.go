@@ -14,20 +14,20 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
-type Os interface {
+type OrganisationStateStorer interface {
 	Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error
 }
 
 type OrganisationState interface {
-	models.OrganisationStateVic | models.OrganisationStateNSW
+	models.OrganisationStateVic | models.OrganisationStateNSW | models.OrganisationStateTasmanium | models.OrganisationStateAct | models.OrganisationStateQLD | models.OrganisationStateSa | models.OrganisationStateNT | models.OrganisationStateWa
 }
 
 type DataImporter[T OrganisationState] struct {
-	o T
+	organisationState T
 }
 
 func NewDataImporter[T OrganisationState](o T) DataImporter[T] {
-	return DataImporter[T]{o: o}
+	return DataImporter[T]{organisationState: o}
 }
 
 func (d DataImporter[T]) getState(ctx context.Context, db *sql.DB, r Row) (*models.State, error) {
@@ -228,11 +228,11 @@ func (d DataImporter[T]) Do(ctx context.Context, db *sql.DB, r Row) error {
 		}
 	}
 
-	var o Os
+	var organisationStateStore OrganisationStateStorer
 
-	switch any(d.o).(type) {
+	switch any(d.organisationState).(type) {
 	case models.OrganisationStateVic:
-		o = &models.OrganisationStateVic{
+		organisationStateStore = &models.OrganisationStateVic{
 			Name:              r.GetCellValueWithCol("ORGANISATION"),
 			OrganisationID:    organisation.ID,
 			Abn:               null.StringFrom(r.GetCellValueWithCol("ABN")),
@@ -245,7 +245,85 @@ func (d DataImporter[T]) Do(ctx context.Context, db *sql.DB, r Row) error {
 			Fax:               null.StringFrom(r.GetCellValueWithCol("FAX")),
 		}
 	case models.OrganisationStateNSW:
-		o = &models.OrganisationStateNSW{
+		organisationStateStore = &models.OrganisationStateNSW{
+			Name:              r.GetCellValueWithCol("ORGANISATION"),
+			OrganisationID:    organisation.ID,
+			Abn:               null.StringFrom(r.GetCellValueWithCol("ABN")),
+			Address:           null.StringFrom(r.GetCellValueWithCol("ADDRESS")),
+			RecordDefunctRisk: null.StringFrom(r.GetCellValueWithCol("RECORD_DEFUNCT_RISK")),
+			Region:            null.StringFrom(r.GetCellValueWithCol("REGION")),
+			Phone:             null.StringFrom(r.GetCellValueWithCol("PHONE")),
+			Mobile:            null.StringFrom(r.GetCellValueWithCol("MOBILE")),
+			Freecall:          null.StringFrom(r.GetCellValueWithCol("FREECALL")),
+			Fax:               null.StringFrom(r.GetCellValueWithCol("FAX")),
+		}
+	case models.OrganisationStateTasmanium:
+		organisationStateStore = &models.OrganisationStateTasmanium{
+			Name:              r.GetCellValueWithCol("ORGANISATION"),
+			OrganisationID:    organisation.ID,
+			Abn:               null.StringFrom(r.GetCellValueWithCol("ABN")),
+			Address:           null.StringFrom(r.GetCellValueWithCol("ADDRESS")),
+			RecordDefunctRisk: null.StringFrom(r.GetCellValueWithCol("RECORD_DEFUNCT_RISK")),
+			Region:            null.StringFrom(r.GetCellValueWithCol("REGION")),
+			Phone:             null.StringFrom(r.GetCellValueWithCol("PHONE")),
+			Mobile:            null.StringFrom(r.GetCellValueWithCol("MOBILE")),
+			Freecall:          null.StringFrom(r.GetCellValueWithCol("FREECALL")),
+			Fax:               null.StringFrom(r.GetCellValueWithCol("FAX")),
+		}
+	case models.OrganisationStateAct:
+		organisationStateStore = &models.OrganisationStateAct{
+			Name:              r.GetCellValueWithCol("ORGANISATION"),
+			OrganisationID:    organisation.ID,
+			Abn:               null.StringFrom(r.GetCellValueWithCol("ABN")),
+			Address:           null.StringFrom(r.GetCellValueWithCol("ADDRESS")),
+			RecordDefunctRisk: null.StringFrom(r.GetCellValueWithCol("RECORD_DEFUNCT_RISK")),
+			Region:            null.StringFrom(r.GetCellValueWithCol("REGION")),
+			Phone:             null.StringFrom(r.GetCellValueWithCol("PHONE")),
+			Mobile:            null.StringFrom(r.GetCellValueWithCol("MOBILE")),
+			Freecall:          null.StringFrom(r.GetCellValueWithCol("FREECALL")),
+			Fax:               null.StringFrom(r.GetCellValueWithCol("FAX")),
+		}
+	case models.OrganisationStateQLD:
+		organisationStateStore = &models.OrganisationStateQLD{
+			Name:              r.GetCellValueWithCol("ORGANISATION"),
+			OrganisationID:    organisation.ID,
+			Abn:               null.StringFrom(r.GetCellValueWithCol("ABN")),
+			Address:           null.StringFrom(r.GetCellValueWithCol("ADDRESS")),
+			RecordDefunctRisk: null.StringFrom(r.GetCellValueWithCol("RECORD_DEFUNCT_RISK")),
+			Region:            null.StringFrom(r.GetCellValueWithCol("REGION")),
+			Phone:             null.StringFrom(r.GetCellValueWithCol("PHONE")),
+			Mobile:            null.StringFrom(r.GetCellValueWithCol("MOBILE")),
+			Freecall:          null.StringFrom(r.GetCellValueWithCol("FREECALL")),
+			Fax:               null.StringFrom(r.GetCellValueWithCol("FAX")),
+		}
+	case models.OrganisationStateNT:
+		organisationStateStore = &models.OrganisationStateNT{
+			Name:              r.GetCellValueWithCol("ORGANISATION"),
+			OrganisationID:    organisation.ID,
+			Abn:               null.StringFrom(r.GetCellValueWithCol("ABN")),
+			Address:           null.StringFrom(r.GetCellValueWithCol("ADDRESS")),
+			RecordDefunctRisk: null.StringFrom(r.GetCellValueWithCol("RECORD_DEFUNCT_RISK")),
+			Region:            null.StringFrom(r.GetCellValueWithCol("REGION")),
+			Phone:             null.StringFrom(r.GetCellValueWithCol("PHONE")),
+			Mobile:            null.StringFrom(r.GetCellValueWithCol("MOBILE")),
+			Freecall:          null.StringFrom(r.GetCellValueWithCol("FREECALL")),
+			Fax:               null.StringFrom(r.GetCellValueWithCol("FAX")),
+		}
+	case models.OrganisationStateSa:
+		organisationStateStore = &models.OrganisationStateSa{
+			Name:              r.GetCellValueWithCol("ORGANISATION"),
+			OrganisationID:    organisation.ID,
+			Abn:               null.StringFrom(r.GetCellValueWithCol("ABN")),
+			Address:           null.StringFrom(r.GetCellValueWithCol("ADDRESS")),
+			RecordDefunctRisk: null.StringFrom(r.GetCellValueWithCol("RECORD_DEFUNCT_RISK")),
+			Region:            null.StringFrom(r.GetCellValueWithCol("REGION")),
+			Phone:             null.StringFrom(r.GetCellValueWithCol("PHONE")),
+			Mobile:            null.StringFrom(r.GetCellValueWithCol("MOBILE")),
+			Freecall:          null.StringFrom(r.GetCellValueWithCol("FREECALL")),
+			Fax:               null.StringFrom(r.GetCellValueWithCol("FAX")),
+		}
+	case models.OrganisationStateWa:
+		organisationStateStore = &models.OrganisationStateWa{
 			Name:              r.GetCellValueWithCol("ORGANISATION"),
 			OrganisationID:    organisation.ID,
 			Abn:               null.StringFrom(r.GetCellValueWithCol("ABN")),
@@ -261,7 +339,7 @@ func (d DataImporter[T]) Do(ctx context.Context, db *sql.DB, r Row) error {
 		return fmt.Errorf("not supported")
 	}
 
-	if err := o.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err := organisationStateStore.Insert(ctx, tx, boil.Infer()); err != nil {
 		switch {
 		case IsUniqueConsstraint(err):
 			tx.Rollback()
