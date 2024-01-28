@@ -27,6 +27,14 @@ tasks:
       TS_DO_MIGRATE: 1
     cmds:
       - ./transactionsearch
+  db:migrate:up:
+    desc: "db migrate manual up"
+    cmds:
+      - migrate -source file://db/migrations -database $TS_POSTGRES_URI up 1
+  db:migrate:down:
+    desc: "db migrate manual down"
+    cmds:
+      - migrate -source file://db/migrations -database $TS_POSTGRES_URI down 1
   db:create:
     desc: "migrate create"
     summary: |
@@ -36,6 +44,64 @@ tasks:
         task migrate:create footable
     cmds:
       - migrate -source file://db/migrations -database $TS_POSTGRES_URI create -dir=./db/migrations -format=unix -ext sql {{.CLI_ARGS}}
+  import:organisations:
+    desc: "(new) import orgnisation data"
+    summary: |
+      Import organisation data for a single region
+
+      Pass [1-7] to this task to import the corresponding region organisation data.
+    silent: true
+    cmds:
+      - |
+        case "{{.CLI_ARGS}}" in
+          1)
+            export TS_ORGANISATIONS_FILE={{.TXACCT_ORGANISATION_IMPORTER_1_FILENAME}}
+            export TS_ORGANISATIONS_WORKSHEET={{.TXACCT_ORGANISATION_IMPORTER_1_WORKSHEET}}
+            export TS_ORGANISATIONS_STATE={{.TXACCT_ORGANISATION_IMPORTER_1_STATE}}
+          ;;
+          2)
+            export TS_ORGANISATIONS_FILE={{.TXACCT_ORGANISATION_IMPORTER_2_FILENAME}}
+            export TS_ORGANISATIONS_WORKSHEET={{.TXACCT_ORGANISATION_IMPORTER_2_WORKSHEET}}
+            export TS_ORGANISATIONS_STATE={{.TXACCT_ORGANISATION_IMPORTER_2_STATE}}
+          ;;
+          3)
+            export TS_ORGANISATIONS_FILE={{.TXACCT_ORGANISATION_IMPORTER_3_FILENAME}}
+            export TS_ORGANISATIONS_WORKSHEET={{.TXACCT_ORGANISATION_IMPORTER_3_WORKSHEET}}
+            export TS_ORGANISATIONS_STATE={{.TXACCT_ORGANISATION_IMPORTER_3_STATE}}
+          ;;
+          4)
+            export TS_ORGANISATIONS_FILE={{.TXACCT_ORGANISATION_IMPORTER_4_FILENAME}}
+            export TS_ORGANISATIONS_WORKSHEET={{.TXACCT_ORGANISATION_IMPORTER_4_WORKSHEET}}
+            export TS_ORGANISATIONS_STATE={{.TXACCT_ORGANISATION_IMPORTER_4_STATE}}
+          ;;
+          5)
+            export TS_ORGANISATIONS_FILE={{.TXACCT_ORGANISATION_IMPORTER_5_FILENAME}}
+            export TS_ORGANISATIONS_WORKSHEET={{.TXACCT_ORGANISATION_IMPORTER_5_WORKSHEET}}
+            export TS_ORGANISATIONS_STATE={{.TXACCT_ORGANISATION_IMPORTER_5_STATE}}
+          ;;
+          6)
+            export TS_ORGANISATIONS_FILE={{.TXACCT_ORGANISATION_IMPORTER_6_FILENAME}}
+            export TS_ORGANISATIONS_WORKSHEET={{.TXACCT_ORGANISATION_IMPORTER_6_WORKSHEET}}
+            export TS_ORGANISATIONS_STATE={{.TXACCT_ORGANISATION_IMPORTER_6_STATE}}
+          ;;
+          7)
+            export TS_ORGANISATIONS_FILE={{.TXACCT_ORGANISATION_IMPORTER_7_FILENAME}}
+            export TS_ORGANISATIONS_WORKSHEET={{.TXACCT_ORGANISATION_IMPORTER_7_WORKSHEET}}
+            export TS_ORGANISATIONS_STATE={{.TXACCT_ORGANISATION_IMPORTER_7_STATE}}
+          ;;
+        esac
+        go build -o ./transactionsearchimportorganisations ./cmd/transactionsearchimportorganisations
+        ./transactionsearchimportorganisations
+  import:organisations:all:
+    desc: "import all orgnisation data"
+    summary: |
+      Import all organisation data
+    silent: true
+    cmds:
+      - |
+        for i in $(seq 1 7); do
+          task import:organisations -- $i
+        done
   import:postcode:
     desc: "import postcode data"
     cmds:
@@ -59,56 +125,6 @@ tasks:
           --publish {{ .HOST_PORT }}:3000 \
           --env-file ~/.txacct.env \
           --name txacct {{.CONTAINER_REGISTRY}}/{{.CONTAINER_IMAGE_NAME}}:{{.CONTAINER_TAG}}
-  organisation:import:all:
-    desc: "import all orgnisation data"
-    summary: |
-      Import all organisation data
-    silent: true
-    cmds:
-      - |
-        for i in $(seq 1 6); do
-          task organisation:import -- $i
-        done
-  organisation:import:
-    desc: "import orgnisation data"
-    summary: |
-      Import organisation data for a single region
-
-      Pass [1-6] to this task to import the corresponding region organisation data.
-    silent: true
-    cmds:
-      - |
-        case "{{.CLI_ARGS}}" in
-          1)
-            filename={{.TXACCT_ORGANISATION_IMPORTER_1_FILENAME}}
-            worksheet={{.TXACCT_ORGANISATION_IMPORTER_1_WORKSHEET}}
-          ;;
-          2)
-            filename={{.TXACCT_ORGANISATION_IMPORTER_2_FILENAME}}
-            worksheet={{.TXACCT_ORGANISATION_IMPORTER_2_WORKSHEET}}
-          ;;
-          3)
-            filename={{.TXACCT_ORGANISATION_IMPORTER_3_FILENAME}}
-            worksheet={{.TXACCT_ORGANISATION_IMPORTER_3_WORKSHEET}}
-          ;;
-          4)
-            filename={{.TXACCT_ORGANISATION_IMPORTER_4_FILENAME}}
-            worksheet={{.TXACCT_ORGANISATION_IMPORTER_4_WORKSHEET}}
-          ;;
-          5)
-            filename={{.TXACCT_ORGANISATION_IMPORTER_5_FILENAME}}
-            worksheet={{.TXACCT_ORGANISATION_IMPORTER_5_WORKSHEET}}
-          ;;
-          6)
-            filename={{.TXACCT_ORGANISATION_IMPORTER_6_FILENAME}}
-            worksheet={{.TXACCT_ORGANISATION_IMPORTER_6_WORKSHEET}}
-          ;;
-          7)
-            filename={{.TXACCT_ORGANISATION_IMPORTER_7_FILENAME}}
-            worksheet={{.TXACCT_ORGANISATION_IMPORTER_7_WORKSHEET}}
-          ;;
-        esac
-        poetry run flask organisation import --filename=${filename} --worksheet=${worksheet} --organisation-source={{.TXACCT_ORGANISATION_SOURCE}}
   transactionsearchtest:run:prod:
     deps: [transactionsearch:build]
     desc: "run transactionsearchtest for prod"

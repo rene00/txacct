@@ -23,13 +23,15 @@ type TransactionHandler interface {
 }
 
 type Transaction struct {
-	db           *sql.DB
-	input        string
-	tokenize     tokenize.Tokenize
-	state        *models.State
-	postcode     *models.Postcode
-	postcodes    []*models.Postcode
-	organisation *models.Organisation
+	db                   *sql.DB
+	input                string
+	tokenize             tokenize.Tokenize
+	state                *models.State
+	postcode             *models.Postcode
+	postcodes            []*models.Postcode
+	organisation         *models.Organisation
+	organisationStateVic *models.OrganisationStateVic
+	organisationStateNSW *models.OrganisationStateNSW
 }
 
 func NewTransaction(s string, db *sql.DB) *Transaction {
@@ -110,32 +112,23 @@ func NewTransactionJSONResponse(t Transaction) (TransactionJSONResponse, error) 
 		r.Postcode = &postcode
 	}
 
-	if t.organisation != nil {
-		organisation := t.organisation.Name
-		r.Organisation = &organisation
-
-	}
-
-	if t.organisation != nil && t.organisation.Address.String != "" {
-		address := t.organisation.Address.String
-		if t.postcode != nil && t.state != nil {
-			address = fmt.Sprintf("%s, %s, %s", address, t.postcode.Locality, t.state.Name)
-		}
-
+	if t.organisationStateVic != nil {
+		address := fmt.Sprintf("%s, %s, %s", t.organisationStateVic.Address.String, t.organisation.R.Postcode.Locality, t.organisation.R.Postcode.R.State.Name)
 		r.Address = &address
 
-		if t.organisation.R != nil && t.organisation.R.BusinessCode != nil {
-			description := t.organisation.R.BusinessCode.Description.String
-			r.Description = &description
-		}
+		organisation := t.organisationStateVic.Name
+		r.Organisation = &organisation
+	} else if t.organisationStateNSW != nil {
+		address := fmt.Sprintf("%s, %s, %s", t.organisationStateNSW.Address.String, t.organisation.R.Postcode.Locality, t.organisation.R.Postcode.R.State.Name)
+		r.Address = &address
 
-		if t.organisation.R != nil && t.organisation.R.Postcode != nil {
-			postcode, err := strconv.Atoi(t.organisation.R.Postcode.Postcode)
-			if err != nil {
-				return r, err
-			}
-			r.Postcode = &postcode
-		}
+		organisation := t.organisationStateNSW.Name
+		r.Organisation = &organisation
+	}
+
+	if t.organisation != nil && t.organisation.R != nil && t.organisation.R.BusinessCode != nil {
+		description := t.organisation.R.BusinessCode.Description.String
+		r.Description = &description
 	}
 
 	return r, nil
