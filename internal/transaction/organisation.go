@@ -6,6 +6,7 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"transactionsearch/internal/handlers"
 	"transactionsearch/internal/tokenize"
 	"transactionsearch/models"
 
@@ -20,6 +21,7 @@ func NewTransactionOrganisation() TransactionHandler {
 
 type Result struct {
 	Similarity                  float64 `boil:"similarity"`
+	OrganisationName            string  `boil:"organisation_name"`
 	models.OrganisationStateVic `boil:",bind"`
 	models.OrganisationStateNSW `boil:",bind"`
 	models.Organisation         `boil:",bind"`
@@ -28,7 +30,7 @@ type Result struct {
 	models.State                `boil:",bind"`
 }
 
-func (to TransactionOrganisation) Handle(ctx context.Context, store Store, transaction *Transaction) error {
+func (to TransactionOrganisation) Handle(ctx context.Context, h handlers.Handlers, transaction *Transaction) error {
 	var err error
 
 	results := []Result{}
@@ -53,6 +55,7 @@ func (to TransactionOrganisation) Handle(ctx context.Context, store Store, trans
 				qm.Select(
 					fmt.Sprintf("%s.id", stateNameTable),
 					fmt.Sprintf("%s.name", stateNameTable),
+					fmt.Sprintf("%s.name AS organisation_name", stateNameTable),
 					fmt.Sprintf("%s.address", stateNameTable),
 					fmt.Sprintf("similarity(%s.name, '%s') as similarity", stateNameTable, name),
 					"organisation.id",
@@ -77,7 +80,7 @@ func (to TransactionOrganisation) Handle(ctx context.Context, store Store, trans
 				qm.InnerJoin("state on state.id = postcode.state_id"),
 			}
 
-			if err = models.NewQuery(q...).Bind(ctx, store.DB, &results); err != nil {
+			if err = models.NewQuery(q...).Bind(ctx, h.DB, &results); err != nil {
 				return fmt.Errorf("failed to query organisation state %s table: %w", stateNameTable, err)
 			}
 
@@ -110,9 +113,14 @@ func (to TransactionOrganisation) Handle(ctx context.Context, store Store, trans
 	// Iterate through all organisations order by similarity desc and set the
 	// transaction organisation of the first organisation that matches the
 	// transacode postcode.
+	for _, postcode := range transaction.postcodes {
+		h.Logger.Debug(fmt.Sprintf("transaction.postcode is (%s) (len:%d) for (%s)", postcode.Postcode, len(transaction.postcodes), transaction.input))
+	}
+
 	for _, similarity := range resultsOrderBySimilaritySortedKeys {
 		for _, result := range resultsOrderBySimilarity[similarity] {
 			for _, postcode := range transaction.postcodes {
+				h.Logger.Debug(fmt.Sprintf("comparing postcode (%s) (len:%d) with (%s) for (%s) with similarity (%d)", postcode.Postcode, len(transaction.postcodes), result.Postcode.Postcode, transaction.input, similarity))
 				if postcode.Postcode == result.Postcode.Postcode {
 					// Perform another select to get organisation with eager
 					// loading BusinessCode. The eager loading of BusinessCode
@@ -126,13 +134,30 @@ func (to TransactionOrganisation) Handle(ctx context.Context, store Store, trans
 						qm.InnerJoin("state on state.id = postcode.state_id"),
 					}
 
-					organisation, err := models.Organisations(q...).One(ctx, store.DB)
+					organisation, err := models.Organisations(q...).One(ctx, h.DB)
 					if err != nil {
 						return fmt.Errorf("failed to query organisation: %w", err)
 					}
 					transaction.organisation = organisation
-					transaction.postcode = organisation.R.Postcode
 					transaction.state = organisation.R.Postcode.R.State
+
+					// if there are multiple transaction.postcodes that share
+					// the same locality, iterate through list and choose
+					// lowest postcode to assign to this organisation.
+					transaction.postcode = organisation.R.Postcode
+					if len(transaction.postcodes) > 0 {
+						lowestPostcode := *organisation.R.Postcode
+						for _, postcode := range transaction.postcodes {
+							if strings.ToLower(postcode.Locality) == strings.ToLower(organisation.R.Postcode.Locality) {
+								h.Logger.Debug(fmt.Sprintf("comparing postcode locality (%s,%s) with (%s,%s) for (%s) with similarity (%d)", postcode.Locality, postcode.Postcode, lowestPostcode.Locality, lowestPostcode.Postcode, transaction.input, similarity))
+								if postcode.Postcode < lowestPostcode.Postcode {
+									h.Logger.Debug("true")
+									lowestPostcode = postcode
+								}
+							}
+						}
+						transaction.postcode = &lowestPostcode
+					}
 
 					if result.OrganisationStateVic != (models.OrganisationStateVic{}) {
 						transaction.organisationStateVic = &result.OrganisationStateVic
@@ -152,7 +177,7 @@ func (to TransactionOrganisation) Handle(ctx context.Context, store Store, trans
 // querySkipToken accepts a token and attempts to determine if this token
 // should be skipped when building the query used to find the organisation.
 func (to TransactionOrganisation) querySkipToken(token tokenize.Token) bool {
-	if token.IsLocality() {
+	if token.IsGeo() {
 		return true
 	}
 

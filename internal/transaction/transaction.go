@@ -6,20 +6,13 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"transactionsearch/internal/handlers"
 	"transactionsearch/internal/tokenize"
 	"transactionsearch/models"
-
-	"github.com/datasapiens/cachier"
 )
 
-type Store struct {
-	DB *sql.DB
-	// Cache is an LRU cache for Organisation.
-	Cache *cachier.Cache[models.Organisation]
-}
-
 type TransactionHandler interface {
-	Handle(ctx context.Context, store Store, transaction *Transaction) error
+	Handle(ctx context.Context, h handlers.Handlers, transaction *Transaction) error
 }
 
 type Transaction struct {
@@ -28,7 +21,7 @@ type Transaction struct {
 	tokenize             tokenize.Tokenize
 	state                *models.State
 	postcode             *models.Postcode
-	postcodes            []*models.Postcode
+	postcodes            []models.Postcode
 	organisation         *models.Organisation
 	organisationStateVic *models.OrganisationStateVic
 	organisationStateNSW *models.OrganisationStateNSW

@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,11 +12,11 @@ import (
 	"syscall"
 
 	"transactionsearch/db/migrations"
+	"transactionsearch/internal/handlers"
+	"transactionsearch/internal/logwrap"
 	"transactionsearch/internal/router"
 	"transactionsearch/internal/transaction"
-	"transactionsearch/models"
 
-	"github.com/datasapiens/cachier"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"golang.org/x/sync/errgroup"
@@ -56,16 +55,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	_cacheLRUSize, ok := os.LookupEnv("TS_CACHE_LRU_SIZE")
-	if !ok {
-		_cacheLRUSize = "300"
-	}
-
-	cacheLRUSize, err := strconv.Atoi(_cacheLRUSize)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	db, err := sql.Open("pgx", postgresURI)
 	if err != nil {
 		log.Fatal(err)
@@ -74,9 +63,13 @@ func main() {
 
 	boil.SetDB(db)
 
+	logger := logwrap.New("logger", os.Stdout, true)
+	logger.SetLevel(logwrap.INFO)
+
 	tsDebug := false
 	if d, ok := os.LookupEnv("TS_DEBUG"); ok && d == "1" {
 		tsDebug = true
+		logger.SetLevel(logwrap.DEBUG)
 	}
 	boil.DebugMode = tsDebug
 
@@ -85,6 +78,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		logger.Info("completed database migrations")
 		return
 	}
 
@@ -109,7 +103,7 @@ func main() {
 		}
 
 		go func() {
-			log.Printf("Server listening on http://%s", listenAddrPort)
+			logger.Info(fmt.Sprintf("Server listening on http://%s", listenAddrPort))
 			if err := s.ListenAndServe(); err != http.ErrServerClosed {
 				panic(err)
 			}
@@ -118,7 +112,7 @@ func main() {
 		for {
 			select {
 			case <-ctx.Done():
-				log.Print("router shutting down")
+				logger.Info("router shutting down")
 				return s.Shutdown(ctx)
 			}
 		}
@@ -140,24 +134,7 @@ func main() {
 
 	g.Go(func() error {
 
-		lc, err := cachier.NewLRUCache(cacheLRUSize,
-			func(value interface{}) ([]byte, error) {
-				return json.Marshal(value)
-			},
-			func(b []byte, value *interface{}) error {
-				var res models.Organisation
-				return json.Unmarshal(b, &res)
-				*value = res
-				return nil
-			},
-			nil)
-		if err != nil {
-			return err
-		}
-
-		cache := cachier.MakeCache[models.Organisation](lc)
-
-		store := transaction.Store{db, cache}
+		handlers := handlers.Handlers{db, logger}
 
 		for req := range workerCh {
 			resp := router.WorkerResponse{Error: nil}
@@ -169,7 +146,7 @@ func main() {
 			}
 
 			for _, handler := range transactionHandlers {
-				if err := handler.Handle(ctx, store, req.Transaction); err != nil {
+				if err := handler.Handle(ctx, handlers, req.Transaction); err != nil {
 					resp.Error = err
 					break
 				}
@@ -182,7 +159,7 @@ func main() {
 	})
 
 	if err := g.Wait(); err != nil {
-		log.Printf("errgroup received error: %v", err)
+		logger.Info(fmt.Sprintf("errgroup received error: %v", err))
 		cancel()
 		os.Exit(1)
 	}
