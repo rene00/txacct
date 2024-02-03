@@ -1,6 +1,7 @@
 package tokenize
 
 import (
+	"slices"
 	"strings"
 )
 
@@ -30,17 +31,18 @@ func (t *Tokenize) Tokens() []*Token {
 
 // Tokens returns a slice of tokens in reverse.
 func (t Tokenize) TokensReversed() []*Token {
-	tokens := make([]*Token, len(t.tokens))
-	for i, j := len(t.tokens)-1, 0; i >= 0; i, j = i-1, j+1 {
-		tokens[j] = t.tokens[i]
+	r := []*Token{}
+	for _, token := range t.Tokens() {
+		r = append(r, token)
 	}
-	return tokens
+	slices.Reverse(r)
+	return r
 }
 
 // Last returns to the last token.
-func (t Tokenize) Last() Token {
+func (t Tokenize) Last() *Token {
 	token := t.tokens[len(t.tokens)-1]
-	return *token
+	return token
 }
 
 // NewTokenize returns a new Tokenize.
@@ -51,8 +53,14 @@ func NewTokenize() Tokenize {
 type Token struct {
 	value    string
 	position int
+	// geo is true if token contains geo data which is postcode, state or country.
+	geo bool
 	// locality is true if the token contains locality data (i.e. postcode).
 	locality bool
+	// state is true if token contains state data (i.e. VIC).
+	state bool
+	// country is true if token contains country data (i.e. AUS).
+	country  bool
 	previous *Token
 }
 
@@ -74,5 +82,30 @@ func (t Token) IsLocality() bool {
 
 func (t *Token) SetLocality(b bool) {
 	t.locality = b
+	t.geo = true
 	return
+}
+
+func (t *Token) SetState(b bool) {
+	t.state = b
+	t.geo = true
+	return
+}
+
+func (t Token) IsState() bool {
+	return t.state
+}
+
+func (t *Token) SetCountry(b bool) {
+	t.country = b
+	t.geo = true
+	return
+}
+
+func (t Token) IsCountry() bool {
+	return t.country
+}
+
+func (t Token) IsGeo() bool {
+	return t.geo
 }

@@ -134,6 +134,8 @@ ALTER TABLE ONLY postcode
 ALTER TABLE ONLY postcode
     ADD CONSTRAINT postcode_state_id_fkey FOREIGN KEY (state_id) REFERENCES state(id);
 
+CREATE INDEX postcode_locality_trgm_idx ON postcode USING GIST (locality gist_trgm_ops(siglen=32));
+
 /* organisation */
 CREATE TABLE organisation (
     id INTEGER NOT NULL,

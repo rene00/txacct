@@ -73,3 +73,32 @@ func TestPrevious(t *testing.T) {
 		})
 	}
 }
+
+func TestReversed(t *testing.T) {
+	tests := []struct {
+		s string
+		e []string
+	}{
+		{
+			"foo bar baz",
+			[]string{"baz", "bar", "foo"},
+		},
+		{
+			"1 2 3 4",
+			[]string{"4", "3", "2", "1"},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run("", func(t *testing.T) {
+			tk := NewTokenize()
+			tk.Parse(test.s)
+
+			reversed := tk.TokensReversed()
+			require.Equal(t, len(reversed), len(tk.Tokens()))
+			for idx, token := range reversed {
+				require.Equal(t, test.e[idx], token.ValueString())
+			}
+		})
+	}
+}

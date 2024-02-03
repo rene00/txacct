@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+	"transactionsearch/internal/handlers"
 	"transactionsearch/internal/tokenize"
 	"transactionsearch/models"
 
@@ -18,8 +19,8 @@ func NewTransactionState() TransactionHandler {
 	return TransactionState{}
 }
 
-func (ts TransactionState) Handle(ctx context.Context, store Store, transaction *Transaction) error {
-	states, err := models.States().All(ctx, store.DB)
+func (ts TransactionState) Handle(ctx context.Context, h handlers.Handlers, transaction *Transaction) error {
+	states, err := models.States().All(ctx, h.DB)
 	if err != nil {
 		return err
 	}
@@ -32,7 +33,13 @@ func (ts TransactionState) Handle(ctx context.Context, store Store, transaction 
 		re := regexp.MustCompile(fmt.Sprintf(`(?i)(?P<prefix>\w+)?(?P<state>%s|%s)$`, state.Name, shortState))
 		match := re.FindStringSubmatch(lastToken.ValueString())
 		if len(match) == 3 {
-			lastToken.SetLocality(true)
+			lastToken.SetState(true)
+
+			// if last token not exactly same as state name then mark as locality
+			if strings.ToLower(lastToken.ValueString()) != strings.ToLower(state.Name) {
+				lastToken.SetLocality(true)
+			}
+
 			transaction.state = state
 			return nil
 		}
@@ -46,15 +53,13 @@ func (ts TransactionState) Handle(ctx context.Context, store Store, transaction 
 		if idx == 2 {
 			break
 		}
-		locality := token.ValueString()
 
-		if strings.ToLower(locality) == "aus" {
-			token.SetLocality(true)
+		if token.IsCountry() && !token.IsLocality() {
 			continue
 		}
 
 		re := regexp.MustCompile(`(?i)AUS$`)
-		locality = re.ReplaceAllString(locality, "")
+		locality := re.ReplaceAllString(token.ValueString(), "")
 
 		combined = append(combined, token)
 
@@ -62,14 +67,14 @@ func (ts TransactionState) Handle(ctx context.Context, store Store, transaction 
 			qm.Where("locality=?", locality),
 			qm.InnerJoin("state s on postcode.state_id = s.id"),
 		}
-		postcodes, err := models.Postcodes(q...).All(ctx, store.DB)
+		postcodes, err := models.Postcodes(q...).All(ctx, h.DB)
 		if err != nil {
 			return nil
 		}
 
 		postcodeStates := map[*models.State][]*models.Postcode{}
 		for _, postcode := range postcodes {
-			state, err := postcode.State().One(ctx, store.DB)
+			state, err := postcode.State().One(ctx, h.DB)
 			if err != nil {
 				return err
 			}
@@ -88,19 +93,24 @@ func (ts TransactionState) Handle(ctx context.Context, store Store, transaction 
 			for _, token := range combined {
 				locality = re.ReplaceAllString(token.ValueString(), "")
 				s = append(s, locality)
+
+				// if token contains .*AUS$ set token to Country but it will also be locality.
+				if strings.ToLower(locality) != strings.ToLower(token.ValueString()) {
+					token.SetCountry(true)
+				}
 			}
 
 			q := []qm.QueryMod{
 				qm.Where("locality ilike ?", fmt.Sprintf("%s", strings.Join(s, " "))+"%"),
 				qm.InnerJoin("state s on postcode.state_id = s.id"),
 			}
-			postcodes, err := models.Postcodes(q...).All(ctx, store.DB)
+			postcodes, err := models.Postcodes(q...).All(ctx, h.DB)
 			if err != nil {
 				return err
 			}
 
 			for _, postcode := range postcodes {
-				state, err := postcode.State().One(ctx, store.DB)
+				state, err := postcode.State().One(ctx, h.DB)
 				if err != nil {
 					return err
 
