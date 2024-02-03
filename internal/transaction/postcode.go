@@ -196,7 +196,7 @@ func (tp TransactionPostcode) Handle(ctx context.Context, h handlers.Handlers, t
 		}
 		foundResult = append(foundResult, res)
 		resultsOrderBySimilarity[res.Similarity] = foundResult
-		h.Logger.Debug(fmt.Sprintf("adding postcode (%s) to resultsOrderBySimilarity[%d]", res.Postcode.Postcode, res.Similarity))
+		h.Logger.Debug(fmt.Sprintf("adding postcode (%s) to resultsOrderBySimilarity[%f]", res.Postcode.Postcode, res.Similarity))
 	}
 
 	resultsOrderBySimilaritySortedKeys := make([]float64, 0, len(resultsOrderBySimilarity))

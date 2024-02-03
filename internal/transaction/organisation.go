@@ -126,7 +126,7 @@ func (to TransactionOrganisation) Handle(ctx context.Context, h handlers.Handler
 	for _, similarity := range resultsOrderBySimilaritySortedKeys {
 		for _, result := range resultsOrderBySimilarity[similarity] {
 			for _, postcode := range transaction.postcodes {
-				h.Logger.Debug(fmt.Sprintf("comparing postcode (%s) (len:%d) with (%s) for (%s) with similarity (%d)", postcode.Postcode, len(transaction.postcodes), result.Postcode.Postcode, transaction.input, similarity))
+				h.Logger.Debug(fmt.Sprintf("comparing postcode (%s) (len:%d) with (%s) for (%s) with similarity (%f)", postcode.Postcode, len(transaction.postcodes), result.Postcode.Postcode, transaction.input, similarity))
 				if postcode.Postcode == result.Postcode.Postcode {
 					// Perform another select to get organisation with eager
 					// loading BusinessCode. The eager loading of BusinessCode
@@ -155,7 +155,7 @@ func (to TransactionOrganisation) Handle(ctx context.Context, h handlers.Handler
 						lowestPostcode := *organisation.R.Postcode
 						for _, postcode := range transaction.postcodes {
 							if strings.ToLower(postcode.Locality) == strings.ToLower(organisation.R.Postcode.Locality) {
-								h.Logger.Debug(fmt.Sprintf("comparing postcode locality (%s,%s) with (%s,%s) for (%s) with similarity (%d)", postcode.Locality, postcode.Postcode, lowestPostcode.Locality, lowestPostcode.Postcode, transaction.input, similarity))
+								h.Logger.Debug(fmt.Sprintf("comparing postcode locality (%s,%s) with (%s,%s) for (%s) with similarity (%f)", postcode.Locality, postcode.Postcode, lowestPostcode.Locality, lowestPostcode.Postcode, transaction.input, similarity))
 								if postcode.Postcode < lowestPostcode.Postcode {
 									h.Logger.Debug("true")
 									lowestPostcode = postcode
