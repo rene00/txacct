@@ -139,7 +139,7 @@ func NewTransactionJSONResponse(t Transaction) (TransactionJSONResponse, error) 
 		address = fmt.Sprintf("%s, %s, %s", t.organisationStateWa.Address.String, t.organisation.R.Postcode.Locality, t.organisation.R.Postcode.R.State.Name)
 		organisation = t.organisationStateWa.Name
 	default:
-		return r, fmt.Errorf("state not supported")
+		return r, nil
 	}
 
 	r.Address = &address
