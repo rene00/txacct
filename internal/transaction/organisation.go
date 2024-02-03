@@ -45,7 +45,7 @@ func (to TransactionOrganisation) Handle(ctx context.Context, h handlers.Handler
 	if transaction.state != nil {
 		stateNames = append(stateNames, strings.ToLower(transaction.state.Name))
 	} else {
-		stateNames = append(stateNames, []string{"vic", "nsw"}...)
+		stateNames = append(stateNames, []string{"vic", "nsw", "qld", "act", "sa", "nt", "wa", "tasmania"}...)
 	}
 
 	names := to.buildNameQueryContents(*transaction)
@@ -126,7 +126,7 @@ func (to TransactionOrganisation) Handle(ctx context.Context, h handlers.Handler
 	for _, similarity := range resultsOrderBySimilaritySortedKeys {
 		for _, result := range resultsOrderBySimilarity[similarity] {
 			for _, postcode := range transaction.postcodes {
-				h.Logger.Debug(fmt.Sprintf("comparing postcode (%s) (len:%d) with (%s) for (%s) with similarity (%d)", postcode.Postcode, len(transaction.postcodes), result.Postcode.Postcode, transaction.input, similarity))
+				h.Logger.Debug(fmt.Sprintf("comparing postcode (%s) (len:%d) with (%s) for (%s) with similarity (%f)", postcode.Postcode, len(transaction.postcodes), result.Postcode.Postcode, transaction.input, similarity))
 				if postcode.Postcode == result.Postcode.Postcode {
 					// Perform another select to get organisation with eager
 					// loading BusinessCode. The eager loading of BusinessCode
@@ -155,7 +155,7 @@ func (to TransactionOrganisation) Handle(ctx context.Context, h handlers.Handler
 						lowestPostcode := *organisation.R.Postcode
 						for _, postcode := range transaction.postcodes {
 							if strings.ToLower(postcode.Locality) == strings.ToLower(organisation.R.Postcode.Locality) {
-								h.Logger.Debug(fmt.Sprintf("comparing postcode locality (%s,%s) with (%s,%s) for (%s) with similarity (%d)", postcode.Locality, postcode.Postcode, lowestPostcode.Locality, lowestPostcode.Postcode, transaction.input, similarity))
+								h.Logger.Debug(fmt.Sprintf("comparing postcode locality (%s,%s) with (%s,%s) for (%s) with similarity (%f)", postcode.Locality, postcode.Postcode, lowestPostcode.Locality, lowestPostcode.Postcode, transaction.input, similarity))
 								if postcode.Postcode < lowestPostcode.Postcode {
 									h.Logger.Debug("true")
 									lowestPostcode = postcode
@@ -165,10 +165,25 @@ func (to TransactionOrganisation) Handle(ctx context.Context, h handlers.Handler
 						transaction.postcode = &lowestPostcode
 					}
 
-					if result.OrganisationStateVic != (models.OrganisationStateVic{}) {
+					switch {
+					case result.OrganisationStateVic != (models.OrganisationStateVic{}):
 						transaction.organisationStateVic = &result.OrganisationStateVic
-					} else if result.OrganisationStateNSW != (models.OrganisationStateNSW{}) {
+					case result.OrganisationStateNSW != (models.OrganisationStateNSW{}):
 						transaction.organisationStateNSW = &result.OrganisationStateNSW
+					case result.OrganisationStateAct != (models.OrganisationStateAct{}):
+						transaction.organisationStateAct = &result.OrganisationStateAct
+					case result.OrganisationStateQLD != (models.OrganisationStateQLD{}):
+						transaction.organisationStateQLD = &result.OrganisationStateQLD
+					case result.OrganisationStateSa != (models.OrganisationStateSa{}):
+						transaction.organisationStateSa = &result.OrganisationStateSa
+					case result.OrganisationStateNT != (models.OrganisationStateNT{}):
+						transaction.organisationStateNT = &result.OrganisationStateNT
+					case result.OrganisationStateTasmanium != (models.OrganisationStateTasmanium{}):
+						transaction.organisationStateTas = &result.OrganisationStateTasmanium
+					case result.OrganisationStateWa != (models.OrganisationStateWa{}):
+						transaction.organisationStateWa = &result.OrganisationStateWa
+					default:
+						h.Logger.Info(fmt.Sprintf("did not find state for organisation id (%d)", result.Organisation.ID))
 					}
 
 					return nil
