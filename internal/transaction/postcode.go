@@ -207,134 +207,20 @@ func (tp TransactionPostcode) Handle(ctx context.Context, h handlers.Handlers, t
 	slices.Reverse(resultsOrderBySimilaritySortedKeys)
 
 	// Take highest ordered results
-	highest := resultsOrderBySimilaritySortedKeys[0]
-	h2 := resultsOrderBySimilarity[highest]
+	highestSimilarityScore := resultsOrderBySimilaritySortedKeys[0]
+	highestSimilarityResults := resultsOrderBySimilarity[highestSimilarityScore]
 
-	// Take first result in highest result and use that as postcode
-	h1 := h2[0]
-	transaction.postcode = &h1.Postcode
+	// Take first result in highest result and use that as postcode. Since
+	// SELECT orders by Postcode ASC this will be the highest result with the
+	// lowest postcode.
+	firstPostcode := highestSimilarityResults[0]
+	transaction.postcode = &firstPostcode.Postcode
 
-	for _, postcodeResult := range h2 {
-		h.Logger.Debug(fmt.Sprintf("appending found postcode (%s, %s) to postcodes for (%s)", postcodeResult.Postcode.Locality, postcodeResult.Postcode.Postcode, transaction.input))
+	for _, postcodeResult := range highestSimilarityResults {
+		h.Logger.Debug(fmt.Sprintf("postcode (%s, %s) found for (%s)", postcodeResult.Postcode.Locality, postcodeResult.Postcode.Postcode, transaction.input))
 		postcodes = append(postcodes, postcodeResult.Postcode)
 	}
 	transaction.postcodes = postcodes
-
-	for _, postcode := range postcodes {
-		h.Logger.Debug(fmt.Sprintf("postcode2 found (%s, %s) for (%s)", postcode.Locality, postcode.Postcode, transaction.input))
-	}
-
-	for _, postcode := range transaction.postcodes {
-		h.Logger.Debug(fmt.Sprintf("postcode found (%s, %s) for (%s)", postcode.Locality, postcode.Postcode, transaction.input))
-	}
-
-	/*
-		for idx, token := range transaction.tokenize.TokensReversed() {
-
-			// Only iterate through last 2 tokens as they will have postcode locality.
-			if idx == 2 {
-				break
-			}
-
-			if strings.ToLower(token.ValueString()) == "aus" {
-				continue
-			}
-
-			re := regexp.MustCompile("[0-9]")
-			if re.FindString(token.ValueString()) != "" {
-				continue
-			}
-
-			q := []qm.QueryMod{
-				qm.Where("lower(locality) = lower(?)", token.ValueString()),
-				qm.InnerJoin("state s on postcode.state_id = s.id"),
-			}
-
-			s, err := stripStateFromString(ctx, h.DB, token.ValueString())
-			if err != nil {
-				return err
-			}
-
-			s = stripCountryFromString(s)
-			if s == "" {
-				continue
-			}
-
-			previousToken := token.Previous()
-
-			if previousToken != nil && idx == 0 {
-				previousTokenString, err := stripStateFromString(ctx, h.DB, token.Previous().ValueString())
-				if err != nil {
-					return err
-				}
-				previousTokenString = stripCountryFromString(previousTokenString)
-				query := previousTokenString
-				if len(s) != 0 {
-					query = fmt.Sprintf("%s %s", previousTokenString, s)
-				}
-				q = append(q, qm.Or("locality ilike ?", query+"%"))
-			}
-
-			postcodeSlice, err := models.Postcodes(q...).All(ctx, h.DB)
-			if err != nil {
-				return err
-			}
-
-			for _, postcode := range postcodeSlice {
-				found := false
-				for _, foundPostcode := range transaction.postcodes {
-					if postcode.ID == foundPostcode.ID {
-						found = true
-						break
-					}
-				}
-				if !found {
-					transaction.postcodes = append(transaction.postcodes, postcode)
-				}
-			}
-
-			token.SetLocality(true)
-
-			if previousToken != nil {
-				for _, i := range postcodeSlice {
-					if strings.ToLower(previousToken.ValueString()) == strings.ToLower(i.Locality) {
-						previousToken.SetLocality(true)
-						break
-					}
-				}
-			}
-
-			// If 1 or more postcodes found, set the current token locality to
-			// true. This ensures that it is excluded when searching for
-			// organisation.
-			if len(postcodeSlice) == 0 {
-				token.SetLocality(false)
-				if previousToken != nil {
-					previousToken.SetLocality(false)
-				}
-			}
-
-			// If a single postcode was found, assign the state of this postcode to
-			// the transaction.
-			if len(postcodes) == 1 {
-				postcode := postcodes[0]
-				state, err := postcode.State().One(ctx, h.DB)
-				if err != nil {
-					return err
-				}
-				transaction.postcode = postcode
-				transaction.state = state
-			}
-
-		}
-
-	*/
-
-	/*
-		for _, i := range transaction.postcodes {
-			fmt.Printf("DEBUG1a:%s, %d\n", i.Locality, i.ID)
-		}
-	*/
 
 	return nil
 }
