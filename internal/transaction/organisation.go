@@ -20,14 +20,20 @@ func NewTransactionOrganisation() TransactionHandler {
 }
 
 type Result struct {
-	Similarity                  float64 `boil:"similarity"`
-	OrganisationName            string  `boil:"organisation_name"`
-	models.OrganisationStateVic `boil:",bind"`
-	models.OrganisationStateNSW `boil:",bind"`
-	models.Organisation         `boil:",bind"`
-	models.Postcode             `boil:",bind"`
-	models.BusinessCode         `boil:",bind"`
-	models.State                `boil:",bind"`
+	Similarity                        float64 `boil:"similarity"`
+	OrganisationName                  string  `boil:"organisation_name"`
+	models.OrganisationStateVic       `boil:",bind"`
+	models.OrganisationStateNSW       `boil:",bind"`
+	models.OrganisationStateAct       `boil:",bind"`
+	models.OrganisationStateQLD       `boil:",bind"`
+	models.OrganisationStateNT        `boil:",bind"`
+	models.OrganisationStateSa        `boil:",bind"`
+	models.OrganisationStateTasmanium `boil:",bind"`
+	models.OrganisationStateWa        `boil:",bind"`
+	models.Organisation               `boil:",bind"`
+	models.Postcode                   `boil:",bind"`
+	models.BusinessCode               `boil:",bind"`
+	models.State                      `boil:",bind"`
 }
 
 func (to TransactionOrganisation) Handle(ctx context.Context, h handlers.Handlers, transaction *Transaction) error {

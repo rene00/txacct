@@ -25,6 +25,12 @@ type Transaction struct {
 	organisation         *models.Organisation
 	organisationStateVic *models.OrganisationStateVic
 	organisationStateNSW *models.OrganisationStateNSW
+	organisationStateQLD *models.OrganisationStateQLD
+	organisationStateAct *models.OrganisationStateAct
+	organisationStateTas *models.OrganisationStateTasmanium
+	organisationStateSa  *models.OrganisationStateSa
+	organisationStateNT  *models.OrganisationStateNT
+	organisationStateWa  *models.OrganisationStateWa
 }
 
 func NewTransaction(s string, db *sql.DB) *Transaction {
@@ -105,19 +111,39 @@ func NewTransactionJSONResponse(t Transaction) (TransactionJSONResponse, error) 
 		r.Postcode = &postcode
 	}
 
-	if t.organisationStateVic != nil {
-		address := fmt.Sprintf("%s, %s, %s", t.organisationStateVic.Address.String, t.organisation.R.Postcode.Locality, t.organisation.R.Postcode.R.State.Name)
-		r.Address = &address
-
-		organisation := t.organisationStateVic.Name
-		r.Organisation = &organisation
-	} else if t.organisationStateNSW != nil {
-		address := fmt.Sprintf("%s, %s, %s", t.organisationStateNSW.Address.String, t.organisation.R.Postcode.Locality, t.organisation.R.Postcode.R.State.Name)
-		r.Address = &address
-
-		organisation := t.organisationStateNSW.Name
-		r.Organisation = &organisation
+	address := ""
+	organisation := ""
+	switch {
+	case t.organisationStateVic != nil:
+		address = fmt.Sprintf("%s, %s, %s", t.organisationStateVic.Address.String, t.organisation.R.Postcode.Locality, t.organisation.R.Postcode.R.State.Name)
+		organisation = t.organisationStateVic.Name
+	case t.organisationStateNSW != nil:
+		address = fmt.Sprintf("%s, %s, %s", t.organisationStateNSW.Address.String, t.organisation.R.Postcode.Locality, t.organisation.R.Postcode.R.State.Name)
+		organisation = t.organisationStateNSW.Name
+	case t.organisationStateQLD != nil:
+		address = fmt.Sprintf("%s, %s, %s", t.organisationStateQLD.Address.String, t.organisation.R.Postcode.Locality, t.organisation.R.Postcode.R.State.Name)
+		organisation = t.organisationStateQLD.Name
+	case t.organisationStateAct != nil:
+		address = fmt.Sprintf("%s, %s, %s", t.organisationStateAct.Address.String, t.organisation.R.Postcode.Locality, t.organisation.R.Postcode.R.State.Name)
+		organisation = t.organisationStateAct.Name
+	case t.organisationStateTas != nil:
+		address = fmt.Sprintf("%s, %s, %s", t.organisationStateTas.Address.String, t.organisation.R.Postcode.Locality, t.organisation.R.Postcode.R.State.Name)
+		organisation = t.organisationStateTas.Name
+	case t.organisationStateNT != nil:
+		address = fmt.Sprintf("%s, %s, %s", t.organisationStateNT.Address.String, t.organisation.R.Postcode.Locality, t.organisation.R.Postcode.R.State.Name)
+		organisation = t.organisationStateNT.Name
+	case t.organisationStateSa != nil:
+		address = fmt.Sprintf("%s, %s, %s", t.organisationStateSa.Address.String, t.organisation.R.Postcode.Locality, t.organisation.R.Postcode.R.State.Name)
+		organisation = t.organisationStateSa.Name
+	case t.organisationStateWa != nil:
+		address = fmt.Sprintf("%s, %s, %s", t.organisationStateWa.Address.String, t.organisation.R.Postcode.Locality, t.organisation.R.Postcode.R.State.Name)
+		organisation = t.organisationStateWa.Name
+	default:
+		return r, fmt.Errorf("state not supported")
 	}
+
+	r.Address = &address
+	r.Organisation = &organisation
 
 	if t.organisation != nil && t.organisation.R != nil && t.organisation.R.BusinessCode != nil {
 		description := t.organisation.R.BusinessCode.Description.String
