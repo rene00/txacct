@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 	"transactionsearch/internal/transaction"
+	"transactionsearch/internal/validation"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,6 +21,21 @@ func transactionHandler(db *sql.DB, ch chan WorkerRequest) gin.HandlerFunc {
 		var transactionRequest transaction.TransactionJSONRequest
 		if err := ctx.ShouldBindJSON(&transactionRequest); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("")})
+			return
+		}
+
+		validator := validation.NewValidator()
+		for _, rule := range []validation.Rule{
+			validation.ValidateMaxLength(64),
+			validation.ValidateMinLength(12),
+			validation.ValidateRegexp(regexp.MustCompile("^[a-zA-Z0-9*\\-\\s]+$")),
+		} {
+			validator.Add(rule)
+		}
+		errors := validator.Validate(transactionRequest.Memo)
+		if len(errors) > 0 {
+			// pop first error and return
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": errors[0].Error()})
 			return
 		}
 
